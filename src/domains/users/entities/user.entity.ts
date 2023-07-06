@@ -15,17 +15,8 @@ export class User extends BaseEntity {
   })
   password: string;
 
-  @Column({
-    nullable: false,
-    length: 32,
-  })
-  firstName: string;
-
-  @Column({
-    nullable: false,
-    length: 32,
-  })
-  lastName: string;
+  @Column(() => Name)
+  name: Name;
 
   @Column({
     nullable: true,
@@ -38,4 +29,18 @@ export class User extends BaseEntity {
     default: null,
   })
   refreshToken: string;
+}
+
+export class Name {
+  @Column({
+    nullable: false,
+    length: 32,
+  })
+  firstName: string;
+
+  @Column({
+    nullable: false,
+    length: 32,
+  })
+  lastName: string;
 }
