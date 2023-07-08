@@ -24,11 +24,37 @@ export class User extends BaseEntity {
   })
   profilePath: string;
 
-  @Column({
-    nullable: true,
-    default: null,
-  })
+  @Column()
   refreshToken: string;
+
+  static from(params: {
+    email: string;
+    password: string;
+    name: Name;
+    profilePath: string;
+    refreshToken: string;
+  }) {
+    const user = new User();
+    user.email = params.email;
+    user.password = params.password;
+    user.name = params.name;
+    user.profilePath = params.profilePath;
+    user.refreshToken = params.refreshToken;
+  }
+
+  update(params: {
+    email: string;
+    password: string;
+    name: Name;
+    profilePath: string;
+    refreshToken: string;
+  }) {
+    this.email = params.email;
+    this.password = params.password;
+    this.name = params.name;
+    this.profilePath = params.profilePath;
+    this.refreshToken = params.refreshToken;
+  }
 }
 
 export class Name {

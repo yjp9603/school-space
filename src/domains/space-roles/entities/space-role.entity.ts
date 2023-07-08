@@ -11,11 +11,4 @@ export class SpaceRole extends BaseEntity {
     enum: RoleType,
   })
   private type: RoleType;
-
-  public get name(): string {
-    return this._name;
-  }
-  public set name(value: string) {
-    this._name = value;
-  }
 }
