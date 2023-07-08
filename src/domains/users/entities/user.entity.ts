@@ -1,5 +1,6 @@
 import BaseEntity from 'src/base.entity';
 import { Column, Entity } from 'typeorm';
+import { Name } from './name.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -32,41 +33,30 @@ export class User extends BaseEntity {
     password: string;
     name: Name;
     profilePath: string;
-    refreshToken: string;
   }) {
     const user = new User();
+
     user.email = params.email;
     user.password = params.password;
     user.name = params.name;
     user.profilePath = params.profilePath;
-    user.refreshToken = params.refreshToken;
+
+    return user;
   }
 
   update(params: {
     email: string;
     password: string;
-    name: Name;
+    firstName: string;
+    lastName: string;
     profilePath: string;
     refreshToken: string;
   }) {
     this.email = params.email;
     this.password = params.password;
-    this.name = params.name;
+    this.name.firstName = params.firstName;
+    this.name.lastName = params.lastName;
     this.profilePath = params.profilePath;
     this.refreshToken = params.refreshToken;
   }
-}
-
-export class Name {
-  @Column({
-    nullable: false,
-    length: 32,
-  })
-  firstName: string;
-
-  @Column({
-    nullable: false,
-    length: 32,
-  })
-  lastName: string;
 }

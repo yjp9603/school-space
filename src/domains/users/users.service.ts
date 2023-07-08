@@ -1,11 +1,24 @@
+import { User } from 'src/domains/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRepository } from './repositories/user.repository';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private userRepository: UserRepository) {}
+  async createUser(dto: CreateUserDto) {
+    const params = {
+      email: dto.email,
+      password: dto.password,
+      name: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+      },
+      profilePath: dto.profilePath,
+    };
+    const user = User.from(params);
+    return await this.userRepository.save(user);
   }
 
   findAll() {
