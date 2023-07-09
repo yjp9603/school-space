@@ -1,15 +1,11 @@
+import { isDevelopMode } from './utils/env-utils';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatsModule } from 'src/domains/chats/chats.module';
-import { Chat } from 'src/domains/chats/entities/chat.entity';
-import { Post } from 'src/domains/posts/entities/post.entity';
 import { PostsModule } from 'src/domains/posts/posts.module';
-import { SpaceRole } from 'src/domains/space-roles/entities/space-role.entity';
 import { SpaceRolesModule } from 'src/domains/space-roles/space-roles.module';
-import { Space } from 'src/domains/spaces/entities/space.entity';
 import { SpacesModule } from 'src/domains/spaces/spaces.module';
-import { User } from 'src/domains/users/entities/user.entity';
 import { UsersModule } from 'src/domains/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,15 +14,18 @@ import { AppService } from './app.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: isDevelopMode ? './env/.dev.env' : './env/.prod.env',
     }),
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'classum_local.db',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-      // autoLoadEntities: true,
-      logging: true,
-      // dropSchema: false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'sqlite',
+        database: configService.get<string>('DATABASE_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true,
+        logging: true,
+      }),
+      inject: [ConfigService],
     }),
     UsersModule,
     SpacesModule,

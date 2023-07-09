@@ -34,4 +34,10 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-classum_local.db
+# local db (SQLite)
+classum_dev.db
+classum_prod.db
+
+# env
+env
+.env
