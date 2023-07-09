@@ -1,4 +1,4 @@
-import BaseEntity from 'src/base.entity';
+import BaseEntity from 'src/core/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 import { Name } from './name.entity';
 
@@ -12,7 +12,7 @@ export class User extends BaseEntity {
 
   @Column({
     nullable: false,
-    length: 64,
+    length: 32,
   })
   password: string;
 
@@ -21,11 +21,12 @@ export class User extends BaseEntity {
 
   @Column({
     nullable: true,
-    default: null,
   })
   profilePath: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   refreshToken: string;
 
   static from(params: {

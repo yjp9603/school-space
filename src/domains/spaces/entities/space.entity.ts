@@ -1,6 +1,6 @@
 import { User } from './../../users/entities/user.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import BaseEntity from 'src/base.entity';
+import BaseEntity from 'src/core/entity/base.entity';
 @Entity()
 export class Space extends BaseEntity {
   @Column({

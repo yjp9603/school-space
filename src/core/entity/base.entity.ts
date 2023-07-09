@@ -10,9 +10,9 @@ export default abstract class BaseEntity extends BaseTypeormEntity {
   @PrimaryGeneratedColumn({
     comment: '인덱스',
     unsigned: true,
-    type: 'bigint',
+    type: 'integer',
   })
-  id: string;
+  id: number;
 
   @CreateDateColumn()
   createdAt: Date;

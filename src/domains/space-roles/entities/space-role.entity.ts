@@ -1,4 +1,4 @@
-import BaseEntity from 'src/base.entity';
+import BaseEntity from 'src/core/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 import { RoleType } from '../constants/constants';
 @Entity()
@@ -7,7 +7,7 @@ export class SpaceRole extends BaseEntity {
   private name: string;
 
   @Column({
-    type: 'enum',
+    type: 'varchar',
     enum: RoleType,
   })
   private type: RoleType;
