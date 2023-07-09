@@ -1,10 +1,11 @@
 import { User } from 'src/domains/users/entities/user.entity';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
       where: { email: dto.email },
     });
     if (existEmail) {
-      throw new ConflictException('이미 존재하는 이메일입니다.');
+      throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }
 
     const user = await User.from(dto);
