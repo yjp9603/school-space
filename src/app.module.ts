@@ -15,6 +15,7 @@ import { UsersModule } from 'src/domains/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './core/middleware/logger.middleware';
+import { AuthModule } from './domains/auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { LoggerMiddleware } from './core/middleware/logger.middleware';
     SpaceRolesModule,
     PostsModule,
     ChatsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
