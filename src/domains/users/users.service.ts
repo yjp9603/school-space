@@ -1,26 +1,20 @@
 import { User } from 'src/domains/users/entities/user.entity';
-import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  constructor(private userRepository: UserRepository) {}
   /**
    * 유저 회원가입
    * @param dto CreateUserDto
    * @returns User
    */
   async createUser(dto: CreateUserDto): Promise<User> {
-    const existEmail = await this.userRepository.findOne({
-      where: { email: dto.email },
-    });
+    const existEmail = await this.userRepository.existByEmail(dto.email);
     if (existEmail) {
       throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }
