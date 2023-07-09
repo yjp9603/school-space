@@ -21,13 +21,12 @@ export class CreateUserDto {
   })
   password: string;
 
-  @IsNotEmpty()
   @IsString()
-  firstName: string;
-
   @IsNotEmpty()
-  @IsString()
-  lastName: string;
+  name: {
+    firstName: string;
+    lastName: string;
+  };
 
   @IsOptional()
   @IsEmpty()

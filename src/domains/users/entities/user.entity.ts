@@ -1,5 +1,10 @@
 import BaseEntity from 'src/core/entity/base.entity';
 import { Column, Entity } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { UnauthorizedException } from '@nestjs/common';
+import { Exclude } from 'class-transformer';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { Name } from './name.entity';
 
 @Entity()
@@ -10,13 +15,16 @@ export class User extends BaseEntity {
   })
   email: string;
 
+  @Exclude()
   @Column({
     nullable: false,
     length: 32,
   })
   password: string;
 
-  @Column(() => Name)
+  @Column(() => Name, {
+    prefix: false,
+  })
   name: Name;
 
   @Column({
@@ -29,35 +37,42 @@ export class User extends BaseEntity {
   })
   refreshToken: string;
 
-  static from(params: {
-    email: string;
-    password: string;
-    name: Name;
-    profilePath: string;
-  }) {
+  static async from(dto: CreateUserDto): Promise<User> {
     const user = new User();
-
-    user.email = params.email;
-    user.password = params.password;
-    user.name = params.name;
-    user.profilePath = params.profilePath;
+    user.email = dto.email;
+    user.password = await user.hashPassword(dto.password);
+    user.name = dto.name;
+    user.profilePath = dto.profilePath || null;
 
     return user;
   }
 
-  update(params: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    profilePath: string;
-    refreshToken: string;
-  }) {
-    this.email = params.email;
-    this.password = params.password;
-    this.name.firstName = params.firstName;
-    this.name.lastName = params.lastName;
-    this.profilePath = params.profilePath;
-    this.refreshToken = params.refreshToken;
+  async update(dto: UpdateUserDto): Promise<User> {
+    this.name = dto.name;
+    this.profilePath = dto.profilePath;
+
+    return this;
+  }
+
+  private hashPassword(password: string): Promise<string> {
+    const salt = bcrypt.genSaltSync();
+    return bcrypt.hashSync(password, salt);
+  }
+
+  private async comparePassword(
+    password: string,
+    hashPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compareSync(password, hashPassword);
+  }
+
+  private async validatePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<void> {
+    const equalPassword = await this.comparePassword(password, hashedPassword);
+    if (!equalPassword) {
+      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+    }
   }
 }

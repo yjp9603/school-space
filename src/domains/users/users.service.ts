@@ -1,5 +1,5 @@
 import { User } from 'src/domains/users/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
@@ -11,17 +11,21 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
-  async createUser(dto: CreateUserDto) {
-    const params = {
-      email: dto.email,
-      password: dto.password,
-      name: {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-      },
-      profilePath: dto.profilePath,
-    };
-    const user = User.from(params);
+  /**
+   * 유저 회원가입
+   * @param dto CreateUserDto
+   * @returns User
+   */
+  async createUser(dto: CreateUserDto): Promise<User> {
+    const existEmail = await this.userRepository.findOne({
+      where: { email: dto.email },
+    });
+    if (existEmail) {
+      throw new ConflictException('이미 존재하는 이메일입니다.');
+    }
+
+    const user = await User.from(dto);
+
     return await this.userRepository.save(user);
   }
 
@@ -33,8 +37,10 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOneOrFail(id);
+    await user.update(dto);
+    return this.userRepository.save(user);
   }
 
   remove(id: number) {

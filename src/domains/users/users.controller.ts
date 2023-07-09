@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Response } from 'express';
 
 @Controller({
   path: 'users',
@@ -18,9 +20,9 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post()
-  async create(@Body() dto: CreateUserDto) {
+  async create(@Res() res: Response, @Body() dto: CreateUserDto) {
     const result = await this.usersService.createUser(dto);
-    return result.id;
+    return res.status(201).json(result.id);
   }
 
   @Get()
@@ -35,7 +37,8 @@ export class UsersController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    const result = this.usersService.update(id, updateUserDto);
+    return result;
   }
 
   @Delete(':id')
