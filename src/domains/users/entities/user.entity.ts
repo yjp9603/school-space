@@ -6,6 +6,7 @@ import { Exclude } from 'class-transformer';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { Name } from './name.entity';
+import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 
 @Entity()
 export class User extends BaseEntity {
@@ -59,18 +60,19 @@ export class User extends BaseEntity {
     return bcrypt.hashSync(password, salt);
   }
 
-  private async comparePassword(
-    password: string,
-    hashPassword: string,
-  ): Promise<boolean> {
-    return await bcrypt.compareSync(password, hashPassword);
-  }
+  // private async comparePassword(
+  //   password: string,
+  //   hashPassword: string,
+  // ): Promise<boolean> {
+  //   return await bcrypt.compareSync(password, hashPassword);
+  // }
 
-  private async validatePassword(
+  async validatePassword(
     password: string,
     hashedPassword: string,
   ): Promise<void> {
-    const equalPassword = await this.comparePassword(password, hashedPassword);
+    const equalPassword = await bcrypt.compareSync(password, hashedPassword);
+
     if (!equalPassword) {
       throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
     }
