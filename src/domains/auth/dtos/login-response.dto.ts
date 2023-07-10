@@ -1,5 +1,5 @@
 export class LoginResponseDto {
-  idx: number;
+  id: number;
 
   accessToken: string;
 

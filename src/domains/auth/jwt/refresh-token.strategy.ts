@@ -20,7 +20,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
   async validate(req: Request, payload: any) {
     const user = await this.userRepository.findOne({
       where: {
-        idx: payload.userIdx,
+        id: payload.userId,
       },
     });
     if (!user) {
