@@ -1,5 +1,4 @@
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
-import { Request } from 'express';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -17,7 +16,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: any) {
+  async validate(payload: any) {
     const user = await this.userRepository.findOne({
       where: {
         id: payload.userId,

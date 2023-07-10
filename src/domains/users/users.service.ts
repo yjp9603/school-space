@@ -1,9 +1,14 @@
 import { User } from 'src/domains/users/entities/user.entity';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { UserInfoResponseDto } from './dto/user-info-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +27,20 @@ export class UsersService {
     const user = await User.from(dto);
 
     return await this.userRepository.save(user);
+  }
+
+  /**
+   * 내 정보 조회
+   * @param userIdx 유저 인덱스
+   * @returns 패스워드, 삭제일 제외한 유저 정보
+   */
+  async getUserInfo(userId: number) {
+    const userInfo = await this.userRepository.findByUserId(userId);
+
+    if (!userInfo) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+    return new UserInfoResponseDto(userInfo);
   }
 
   findAll() {

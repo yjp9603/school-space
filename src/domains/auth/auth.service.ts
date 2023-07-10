@@ -13,7 +13,7 @@ export class AuthService {
   /**
    * 로그인
    * @param loginUserDto
-   * @returns JwtToken
+   * @returns accessToken, refreshToken, id
    */
   async login(dto: LoginUserDto) {
     const user = await this.userRepository.findOne({
@@ -22,8 +22,6 @@ export class AuthService {
       },
     });
     if (!user) {
-      // 유저가 존재하지 않는 경우에는 NotFoundException 던져주는 것이 일반적이나,
-      // 로그인에서만 예외적으로 이메일, 비밀번호 중 어떤 정보가 잘못 됐는지 확인하지 못하게 하기 위하여 UnauthorizedException로 통일함.
       throw new UnauthorizedException(HttpErrorConstants.INVALID_AUTH);
     }
 
@@ -59,8 +57,9 @@ export class AuthService {
     }
 
     // 2. 리프레시 토큰 만료기간 검증
-    const refreshTokenMatches = await this.jwtService.verify(refreshToken);
-    if (!refreshTokenMatches) {
+    try {
+      this.jwtService.verify(refreshToken);
+    } catch (error) {
       throw new UnauthorizedException(HttpErrorConstants.EXPIRED_REFRESH_TOKEN);
     }
 
@@ -82,6 +81,7 @@ export class AuthService {
 
   async generateRefreshToken(userId: number): Promise<string> {
     const payload = { userId: userId };
+
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
       expiresIn: '30 days',

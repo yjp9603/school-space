@@ -16,11 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const user = await this.userRepository.findOne({
-      where: {
-        id: payload.userId,
-      },
-    });
+    const user = await this.userRepository.findByUserId(payload.userId);
     if (!user) {
       throw new UnauthorizedException(HttpErrorConstants.EXPIRED_ACCESS_TOKEN); //액세스 토큰 만료. 재발급 필요
     }

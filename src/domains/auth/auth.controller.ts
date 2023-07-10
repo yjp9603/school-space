@@ -15,7 +15,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Post('/newAccessToken')
+  @Post('/token')
   async getNewAccessToken(@Res() res, @Body() dto: RefreshTokenDto) {
     const result = await this.authService.getNewAccessToken(dto.refreshToken);
     return res.status(201).send(result);

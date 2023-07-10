@@ -12,6 +12,9 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'express';
+import UseAuthGuards from '../auth/auth-guards/user-auth';
+import { User } from './entities/user.entity';
+import AuthUser from 'src/core/decorators/auth-user.decorator';
 
 @Controller({
   path: 'users',
@@ -23,6 +26,13 @@ export class UsersController {
   async create(@Res() res: Response, @Body() dto: CreateUserDto) {
     const result = await this.usersService.createUser(dto);
     return res.status(201).json(result.id);
+  }
+
+  @UseAuthGuards()
+  @Get('/me')
+  async getUserInfo(@Res() res, @AuthUser() user: User) {
+    const result = await this.usersService.getUserInfo(user.id);
+    return res.status(200).send(result);
   }
 
   @Get()

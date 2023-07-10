@@ -9,4 +9,13 @@ export class UserRepository extends Repository<User> {
     });
     return existEmail;
   }
+
+  async findByUserId(userId: number): Promise<User> {
+    const user = await this.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    return user;
+  }
 }
