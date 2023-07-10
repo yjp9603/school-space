@@ -15,6 +15,7 @@ import { Response } from 'express';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { User } from './entities/user.entity';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Controller({
   path: 'users',
@@ -44,6 +45,17 @@ export class UsersController {
     @AuthUser() user: User,
   ) {
     const result = await this.usersService.update(id, user, updateUserDto);
+    return res.status(200).json(result.id);
+  }
+
+  @UseAuthGuards()
+  @Patch('/password')
+  async updatePassword(
+    @Res() res,
+    @Body() dto: UpdatePasswordDto,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.usersService.updatePassword(user.id, dto);
     return res.status(200).json(result);
   }
 

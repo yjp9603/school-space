@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +30,9 @@ export class UsersService {
     }
     const user = await User.from(dto);
 
-    return await this.userRepository.save(user);
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   /**
@@ -48,11 +51,15 @@ export class UsersService {
 
   /**
    * 유저 정보 수정
-   * @param id 유저 인덱스
+   * @param id 유저 id
    * @param dto UpdateUserDto
-   * @returns 유저 인덱스
+   * @returns 유저 id
    */
-  async update(id: number, requestUser: User, dto: UpdateUserDto) {
+  async update(
+    id: number,
+    requestUser: User,
+    dto: UpdateUserDto,
+  ): Promise<User> {
     const user = await this.userRepository.findByUserId(id);
     if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
@@ -64,7 +71,23 @@ export class UsersService {
 
     await user.update(dto);
     await this.userRepository.save(user);
-    return user.id;
+    return user;
+  }
+
+  /**
+   * 비밀번호 변경
+   * @param userId
+   * @param dto UpdatePasswordDto
+   */
+  async updatePassword(userId: number, dto: UpdatePasswordDto) {
+    const user = await this.userRepository.findByUserId(userId);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    await user.validatePassword(dto.currentPassword, user.password);
+    const newPassword = await user.hashPassword(dto.newPassword);
+    await this.userRepository.updatePasswordByUserId(user.id, newPassword);
   }
 
   remove(id: number) {

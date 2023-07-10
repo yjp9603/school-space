@@ -42,7 +42,7 @@ export class AuthService {
 
   /**
    * 리프레시 토큰으로 액세스 토큰 재생성
-   * @param refreshToken 리프레시토큰
+   * @param refreshToken
    * @returns 새로운 액세스 토큰
    */
   async getNewAccessToken(refreshToken: string) {

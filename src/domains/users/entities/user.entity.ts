@@ -59,7 +59,7 @@ export class User extends BaseEntity {
     return this.id === user.id;
   }
 
-  private hashPassword(password: string): Promise<string> {
+  public hashPassword(password: string): Promise<string> {
     const salt = bcrypt.genSaltSync();
     return bcrypt.hashSync(password, salt);
   }
@@ -71,7 +71,7 @@ export class User extends BaseEntity {
   //   return await bcrypt.compareSync(password, hashPassword);
   // }
 
-  async validatePassword(
+  public async validatePassword(
     password: string,
     hashedPassword: string,
   ): Promise<void> {

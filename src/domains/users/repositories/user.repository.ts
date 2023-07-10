@@ -19,4 +19,8 @@ export class UserRepository extends Repository<User> {
 
     return user;
   }
+
+  async updatePasswordByUserId(userId: number, newPassword: string) {
+    await this.update({ id: userId }, { password: newPassword });
+  }
 }
