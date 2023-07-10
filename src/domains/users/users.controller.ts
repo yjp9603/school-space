@@ -9,8 +9,8 @@ import {
   Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { Response } from 'express';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { User } from './entities/user.entity';
@@ -20,7 +20,7 @@ import AuthUser from 'src/core/decorators/auth-user.decorator';
   path: 'users',
 })
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   async create(@Res() res: Response, @Body() dto: CreateUserDto) {
@@ -29,26 +29,22 @@ export class UsersController {
   }
 
   @UseAuthGuards()
-  @Get('/me')
-  async getUserInfo(@Res() res, @AuthUser() user: User) {
-    const result = await this.usersService.getUserInfo(user.id);
-    return res.status(200).send(result);
-  }
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findUser(@Res() res, @Param('id') id: number, @AuthUser() user: User) {
+    const result = await this.usersService.findUser(id, user);
+    return res.status(200).json(result);
   }
 
+  @UseAuthGuards()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const result = this.usersService.update(id, updateUserDto);
-    return result;
+  async updateUser(
+    @Res() res,
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.usersService.update(id, user, updateUserDto);
+    return res.status(200).json(result);
   }
 
   @Delete(':id')

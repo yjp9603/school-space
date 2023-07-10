@@ -3,8 +3,8 @@ import { Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { Exclude } from 'class-transformer';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
 import { Name } from './name.entity';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 
@@ -55,6 +55,10 @@ export class User extends BaseEntity {
     return this;
   }
 
+  public equals(user: User): boolean {
+    return this.id === user.id;
+  }
+
   private hashPassword(password: string): Promise<string> {
     const salt = bcrypt.genSaltSync();
     return bcrypt.hashSync(password, salt);
@@ -74,7 +78,7 @@ export class User extends BaseEntity {
     const equalPassword = await bcrypt.compareSync(password, hashedPassword);
 
     if (!equalPassword) {
-      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+      throw new UnauthorizedException(HttpErrorConstants.INVALID_AUTH);
     }
   }
 }

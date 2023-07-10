@@ -1,14 +1,18 @@
 import { User } from 'src/domains/users/entities/user.entity';
 import {
   ConflictException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
+import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
-import { UserInfoResponseDto } from './dto/user-info-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,41 +24,47 @@ export class UsersService {
    */
   async createUser(dto: CreateUserDto): Promise<User> {
     const existEmail = await this.userRepository.existByEmail(dto.email);
-    if (existEmail) {
+    if (!existEmail) {
       throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }
-
     const user = await User.from(dto);
 
     return await this.userRepository.save(user);
   }
 
   /**
-   * 내 정보 조회
-   * @param userIdx 유저 인덱스
+   * 유저 정보 조회
+   * @param userId, requestUser
    * @returns 패스워드, 삭제일 제외한 유저 정보
    */
-  async getUserInfo(userId: number) {
-    const userInfo = await this.userRepository.findByUserId(userId);
-
-    if (!userInfo) {
+  async findUser(id: number, requestUser: User): Promise<UserInfoResponseDto> {
+    const user = await this.userRepository.findByUserId(id);
+    if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
     }
-    return new UserInfoResponseDto(userInfo);
+
+    return new UserInfoResponseDto(user, requestUser);
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  /**
+   * 유저 정보 수정
+   * @param id 유저 인덱스
+   * @param dto UpdateUserDto
+   * @returns 유저 인덱스
+   */
+  async update(id: number, requestUser: User, dto: UpdateUserDto) {
+    const user = await this.userRepository.findByUserId(id);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    if (!requestUser.equals(user)) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
-    const user = await this.userRepository.findOneOrFail(id);
     await user.update(dto);
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+    return user.id;
   }
 
   remove(id: number) {

@@ -12,7 +12,7 @@ export default abstract class BaseEntity extends BaseTypeormEntity {
     unsigned: true,
     type: 'integer',
   })
-  id: number;
+  readonly id: number;
 
   @CreateDateColumn()
   createdAt: Date;

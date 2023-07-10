@@ -16,6 +16,7 @@ export class UserRepository extends Repository<User> {
         id: userId,
       },
     });
+
     return user;
   }
 }
