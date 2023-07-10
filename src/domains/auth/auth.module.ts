@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from '../users/repositories/user.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+
+import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { JwtRefreshTokenStrategy } from './jwt/refresh-token.strategy';
-import { UserModule } from './../user/user.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { UserModule } from './../user/user.module';
     }),
     TypeOrmModule.forFeature([UserRepository]),
     PassportModule,
-    forwardRef(() => UserModule),
+    forwardRef(() => UsersModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshTokenStrategy],
