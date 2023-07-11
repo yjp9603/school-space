@@ -18,9 +18,10 @@ export class SpaceUser extends BaseEntity {
   @ManyToOne(() => SpaceRole)
   spaceRole: SpaceRole;
 
-  static from(user: User) {
+  static from(user: User, spaceRole: SpaceRole) {
     const spaceUser = new SpaceUser();
     spaceUser.user = user;
+    spaceUser.spaceRole = spaceRole;
 
     return spaceUser;
   }

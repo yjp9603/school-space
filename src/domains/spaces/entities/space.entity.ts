@@ -55,7 +55,7 @@ export class Space extends BaseEntity {
     const spaceRole = SpaceRole.from(roleName, type);
     space.addSpaceRole(spaceRole);
 
-    const spaceUser = SpaceUser.from(user);
+    const spaceUser = SpaceUser.from(user, spaceRole);
     spaceUser.setOwner();
     space.addSpaceUser(spaceUser);
 

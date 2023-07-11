@@ -6,6 +6,7 @@ export class Name {
     length: 32,
   })
   firstName: string;
+
   @Column({
     nullable: false,
     length: 32,
