@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import BaseEntity from 'src/core/entity/base.entity';
 import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
+import { RoleType } from '../constants/constants';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -22,14 +23,7 @@ export class Space extends BaseEntity {
   @Column()
   accessCode: string;
 
-  // @Column()
-  // userId: number;
-
-  @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User)
-  owner: User;
-
-  @OneToMany(() => SpaceRole, (spaceRole) => spaceRole.space)
+  @OneToMany(() => SpaceRole, (spaceRole) => spaceRole.space, { cascade: true })
   spaceRoles: SpaceRole[];
 
   @OneToMany(() => SpaceUser, (spaceUser) => spaceUser.space, { cascade: true })
@@ -40,25 +34,29 @@ export class Space extends BaseEntity {
     logo,
     adminCode,
     accessCode,
-    // spaceUser,
     user,
+    roleName,
+    type,
   }: {
     spaceName: string;
     logo: string;
     adminCode: string;
     accessCode: string;
-    // spaceUser: SpaceUser;
     user: User;
+    roleName: string;
+    type: RoleType;
   }) {
     const space = new Space();
     space.spaceName = spaceName;
     space.logo = logo;
     space.adminCode = adminCode;
     space.accessCode = accessCode;
-    space.owner = user;
-    const spaceUser = SpaceUser.from(user);
 
-    console.log('spaceUser::', spaceUser);
+    const spaceRole = SpaceRole.from(roleName, type);
+    space.addSpaceRole(spaceRole);
+
+    const spaceUser = SpaceUser.from(user);
+    spaceUser.setOwner();
     space.addSpaceUser(spaceUser);
 
     return space;
@@ -73,5 +71,16 @@ export class Space extends BaseEntity {
       ? this.setSpaceUser(spaceUser)
       : this.spaceUsers.push(spaceUser);
     spaceUser.setSpace(this);
+  }
+
+  private setSpaceRole(spaceRole: SpaceRole) {
+    this.spaceRoles = [spaceRole];
+  }
+
+  public addSpaceRole(spaceRole: SpaceRole) {
+    !this.spaceRoles
+      ? this.setSpaceRole(spaceRole)
+      : this.spaceRoles.push(spaceRole);
+    spaceRole.setSpace(this);
   }
 }

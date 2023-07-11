@@ -33,6 +33,8 @@ export class SpacesService {
       adminCode: dto.adminCode,
       accessCode: dto.accessCode,
       user,
+      roleName: dto.roleName,
+      type: dto.type,
     });
 
     await this.spaceRepository.save(space);

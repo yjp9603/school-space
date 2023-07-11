@@ -6,7 +6,7 @@ import { IsEnum } from 'class-validator';
 @Entity()
 export class SpaceRole extends BaseEntity {
   @Column()
-  roelName: string;
+  roleName: string;
 
   @Column({
     type: 'varchar',
@@ -14,9 +14,18 @@ export class SpaceRole extends BaseEntity {
   @IsEnum(RoleType)
   type: RoleType;
 
-  @Column()
-  spaceId: number;
-
   @ManyToOne(() => Space, (space) => space.spaceRoles)
   space: Space;
+
+  static from(roleName: string, type: RoleType) {
+    const spaceRole = new SpaceRole();
+    spaceRole.roleName = roleName;
+    spaceRole.type = type;
+
+    return spaceRole;
+  }
+
+  public setSpace(space: Space) {
+    this.space = space;
+  }
 }

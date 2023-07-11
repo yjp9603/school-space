@@ -9,7 +9,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatsModule } from 'src/domains/chats/chats.module';
 import { PostsModule } from 'src/domains/posts/posts.module';
-import { SpaceRolesModule } from 'src/domains/space-roles/space-roles.module';
 import { SpacesModule } from 'src/domains/spaces/spaces.module';
 import { UsersModule } from 'src/domains/users/users.module';
 import { AppController } from './app.controller';
@@ -38,7 +37,6 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
     }),
     UsersModule,
     SpacesModule,
-    SpaceRolesModule,
     PostsModule,
     ChatsModule,
     AuthModule,
