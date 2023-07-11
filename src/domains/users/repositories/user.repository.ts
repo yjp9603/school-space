@@ -3,11 +3,13 @@ import { User } from '../entities/user.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async existByEmail(email: string): Promise<User> {
-    const existEmail = await this.findOne({
-      where: { email },
+  async existByEmail(email: string): Promise<boolean> {
+    const user = await this.count({
+      where: {
+        email: email,
+      },
     });
-    return existEmail;
+    return !!user;
   }
 
   async findByUserId(userId: number): Promise<User> {

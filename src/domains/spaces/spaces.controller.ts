@@ -10,14 +10,21 @@ import {
 import { SpacesService } from './spaces.service';
 import { CreateSpaceDto } from './dto/create-space.dto';
 import { UpdateSpaceDto } from './dto/update-space.dto';
+import AuthUser from 'src/core/decorators/auth-user.decorator';
+import { User } from '../users/entities/user.entity';
+import UseAuthGuards from '../auth/auth-guards/user-auth';
 
 @Controller('spaces')
 export class SpacesController {
   constructor(private readonly spacesService: SpacesService) {}
 
   @Post()
-  create(@Body() createSpaceDto: CreateSpaceDto) {
-    return this.spacesService.create(createSpaceDto);
+  @UseAuthGuards()
+  async createSpace(
+    @Body() createSpaceDto: CreateSpaceDto,
+    @AuthUser() user: User,
+  ) {
+    return await this.spacesService.createSpace(createSpaceDto, user.id);
   }
 
   @Get()

@@ -17,7 +17,7 @@ import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UserRepository) {}
   /**
    * 유저 회원가입
    * @param dto CreateUserDto
@@ -25,9 +25,11 @@ export class UsersService {
    */
   async createUser(dto: CreateUserDto): Promise<User> {
     const existEmail = await this.userRepository.existByEmail(dto.email);
-    if (!existEmail) {
+    console.log('existEmail::', existEmail);
+    if (existEmail) {
       throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }
+
     const user = await User.from(dto);
 
     await this.userRepository.save(user);

@@ -38,12 +38,22 @@ export class User extends BaseEntity {
   })
   refreshToken: string;
 
-  static async from(dto: CreateUserDto): Promise<User> {
+  static async from({
+    email,
+    password,
+    name,
+    profilePath,
+  }: {
+    email: string;
+    password: string;
+    name: Name;
+    profilePath?: string;
+  }) {
     const user = new User();
-    user.email = dto.email;
-    user.password = await user.hashPassword(dto.password);
-    user.name = dto.name;
-    user.profilePath = dto.profilePath || null;
+    user.email = email;
+    user.password = await user.hashPassword(password);
+    user.name = name;
+    user.profilePath = profilePath || null;
 
     return user;
   }
@@ -63,13 +73,6 @@ export class User extends BaseEntity {
     const salt = bcrypt.genSaltSync();
     return bcrypt.hashSync(password, salt);
   }
-
-  // private async comparePassword(
-  //   password: string,
-  //   hashPassword: string,
-  // ): Promise<boolean> {
-  //   return await bcrypt.compareSync(password, hashPassword);
-  // }
 
   public async validatePassword(
     password: string,
