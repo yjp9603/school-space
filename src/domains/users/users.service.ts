@@ -89,8 +89,4 @@ export class UsersService {
     const newPassword = await user.hashPassword(dto.newPassword);
     await this.userRepository.updatePasswordByUserId(user.id, newPassword);
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
 }

@@ -17,9 +17,7 @@ import { User } from './entities/user.entity';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 
-@Controller({
-  path: 'users',
-})
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -30,14 +28,14 @@ export class UsersController {
   }
 
   @UseAuthGuards()
-  @Get(':id')
+  @Get('/:id')
   async findUser(@Res() res, @Param('id') id: number, @AuthUser() user: User) {
     const result = await this.usersService.findUser(id, user);
     return res.status(200).json(result);
   }
 
   @UseAuthGuards()
-  @Patch(':id')
+  @Patch('/:id')
   async updateUser(
     @Res() res,
     @Param('id') id: number,
@@ -57,10 +55,5 @@ export class UsersController {
   ) {
     const result = await this.usersService.updatePassword(user.id, dto);
     return res.status(200).json(result);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
   }
 }
