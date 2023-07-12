@@ -17,6 +17,7 @@ import { User } from '../users/entities/user.entity';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { Response } from 'express';
 import { PageRequest } from 'src/common/page';
+import { JoinSpaceDto } from './dto/join-space.dto';
 
 @Controller('spaces')
 export class SpacesController {
@@ -36,8 +37,8 @@ export class SpacesController {
     return res.status(201).json(result);
   }
 
-  @UseAuthGuards()
   @Get()
+  @UseAuthGuards()
   async findAllSpaceList(
     @Res() res: Response,
     @AuthUser() user: User,
@@ -50,14 +51,25 @@ export class SpacesController {
     return res.status(200).json(result);
   }
 
-  @UseAuthGuards()
   @Delete('/:id')
+  @UseAuthGuards()
   async deleteSpace(
     @Res() res: Response,
     @Param('id') spaceId: number,
     @AuthUser() user: User,
   ) {
     const result = await this.spacesService.deleteSpace(spaceId, user.id);
+    return res.status(200).json(result);
+  }
+
+  @Post('/join')
+  @UseAuthGuards()
+  async joinSpace(
+    @Res() res: Response,
+    @Body() dto: JoinSpaceDto,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.spacesService.joinSpace(dto.joinCode, user.id);
     return res.status(200).json(result);
   }
 }

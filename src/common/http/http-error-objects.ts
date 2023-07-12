@@ -39,6 +39,11 @@ export const HttpErrorConstants = {
     message: '공간을 찾을 수 없습니다.',
   } as HttpErrorFormat,
 
+  CANNOT_FIND_ROLE: {
+    errorCode: 'CANNOT_FIND_ROLE',
+    message: '해당 역할이 없습니다.',
+  } as HttpErrorFormat,
+
   EXPIRED_ACCESS_TOKEN: {
     errorCode: 'EXPIRED_ACCESS_TOKEN',
     message: '액세스 토큰이 만료되었습니다.',
@@ -62,5 +67,10 @@ export const HttpErrorConstants = {
   UNPROCESSABLE_ENTITY: {
     errorCode: 'UNPROCESSABLE_ENTITY',
     message: '필수값을 보내지 않았습니다.',
+  } as HttpErrorFormat,
+
+  ALREADY_JOINED_SPACE: {
+    errorCode: 'ALREADY_JOINED_SPACE',
+    message: '이미 참여한 공간입니다.',
   } as HttpErrorFormat,
 };

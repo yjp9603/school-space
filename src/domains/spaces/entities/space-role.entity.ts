@@ -5,11 +5,14 @@ import { Space } from 'src/domains/spaces/entities/space.entity';
 import { IsEnum } from 'class-validator';
 @Entity()
 export class SpaceRole extends BaseEntity {
-  @Column()
+  @Column({
+    nullable: false,
+  })
   roleName: string;
 
   @Column({
     type: 'varchar',
+    nullable: false,
   })
   @IsEnum(RoleType)
   type: RoleType;

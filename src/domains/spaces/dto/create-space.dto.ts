@@ -8,10 +8,6 @@ export class CreateSpaceDto {
 
   userId: number;
 
-  adminCode: string;
-
-  accessCode: string;
-
   @IsNotEmpty()
   roles: {
     roleName: string;

@@ -1,10 +1,12 @@
 import { User } from './../../users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import BaseEntity from 'src/common/entity/base.entity';
 import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';
+import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -33,78 +35,51 @@ export class Space extends BaseEntity {
   static from({
     spaceName,
     logo,
-    adminCode,
-    accessCode,
     user,
     roles,
   }: {
     spaceName: string;
     logo: string;
-    adminCode: string;
-    accessCode: string;
     user: User;
     roles: { roleName: string; type: RoleType }[];
-  }) {
+  }): Space {
     const space = new Space();
     space.spaceName = spaceName;
     space.logo = logo;
-    space.adminCode = adminCode;
-    space.accessCode = accessCode;
-
-    const spaceRoles = roles.map((role) => {
-      const spaceRole = SpaceRole.from(role.roleName, role.type);
-      space.addSpaceRole(spaceRole);
-
-      return spaceRole;
-    });
-
-    const spaceUser = SpaceUser.from(
-      user,
-      spaceRoles.find((role) => role.type === RoleType.ADMIN),
+    space.adminCode = uuidv4().substring(0, 8);
+    space.accessCode = uuidv4().substring(0, 8);
+    space.spaceRoles = roles.map((role) =>
+      SpaceRole.from(role.roleName, role.type),
     );
-    spaceUser.setOwner(spaceRoles);
-    space.addSpaceUser(spaceUser);
-
+    space.spaceUsers = [
+      SpaceUser.from(
+        user,
+        space.spaceRoles.find((role) => role.type === RoleType.ADMIN),
+      ),
+    ];
     return space;
   }
-
-  private setSpaceUser(spaceUser: SpaceUser) {
-    this.spaceUsers = [spaceUser];
-  }
-
-  public addSpaceUser(spaceUser: SpaceUser) {
-    !this.spaceUsers
-      ? this.setSpaceUser(spaceUser)
-      : this.spaceUsers.push(spaceUser);
+  addSpaceUser(spaceUser: SpaceUser) {
+    this.spaceUsers.push(spaceUser);
     spaceUser.setSpace(this);
   }
 
-  private setSpaceRole(spaceRole: SpaceRole) {
-    this.spaceRoles = [spaceRole];
-  }
-
-  public addSpaceRole(spaceRole: SpaceRole) {
-    !this.spaceRoles
-      ? this.setSpaceRole(spaceRole)
-      : this.spaceRoles.push(spaceRole);
+  addSpaceRole(spaceRole: SpaceRole) {
+    this.spaceRoles.push(spaceRole);
     spaceRole.setSpace(this);
   }
 
   public removeSpaceRole(spaceRoleId: number) {
     const spaceRole = this.spaceRoles.find((role) => role.id === spaceRoleId);
     if (!spaceRole) {
-      throw new NotFoundException(
-        `Cannot find SpaceRole with id: ${spaceRoleId}`,
-      );
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_ROLE);
     }
 
     const isRoleInUse = this.spaceUsers.some(
       (user) => user.spaceRole.id === spaceRoleId,
     );
     if (isRoleInUse) {
-      throw new BadRequestException(
-        `Cannot delete role with id: ${spaceRoleId}, it is currently in use.`,
-      );
+      throw new BadRequestException();
     }
 
     this.spaceRoles = this.spaceRoles.filter((role) => role.id !== spaceRoleId);

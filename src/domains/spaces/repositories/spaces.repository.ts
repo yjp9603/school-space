@@ -4,8 +4,8 @@ import { PageRequest } from 'src/common/page';
 
 @EntityRepository(Space)
 export class SpaceRepository extends Repository<Space> {
-  findAndCountByUserId(userId: number, pageRequest: PageRequest) {
-    return this.createQueryBuilder('space')
+  async findAndCountByUserId(userId: number, pageRequest: PageRequest) {
+    return await this.createQueryBuilder('space')
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.user', 'user')
       .where('user.id = :userId', { userId })
@@ -14,20 +14,29 @@ export class SpaceRepository extends Repository<Space> {
       .getManyAndCount();
   }
 
-  findByUserId(userId: number) {
-    return this.createQueryBuilder('space')
+  async findByUserId(userId: number) {
+    return await this.createQueryBuilder('space')
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.user', 'user')
       .where('user.id = :userId', { userId })
       .getMany();
   }
 
-  findSpaceUserBySpaceIdAndUserId(spaceId: number, userId: number) {
-    return this.createQueryBuilder('space')
+  async findSpaceUserBySpaceIdAndUserId(spaceId: number, userId: number) {
+    return await this.createQueryBuilder('space')
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.user', 'user')
       .where('space.id = :spaceId', { spaceId })
       .andWhere('user.id = :userId', { userId })
+      .getOne();
+  }
+
+  async findSpaceByJoinCode(joinCode: string) {
+    return await this.createQueryBuilder('space')
+      .leftJoinAndSelect('space.spaceRoles', 'spaceRole')
+      .where('space.adminCode = :joinCode OR space.accessCode = :joinCode', {
+        joinCode,
+      })
       .getOne();
   }
 }

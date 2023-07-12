@@ -4,7 +4,6 @@ import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { Exclude } from 'class-transformer';
 import { UpdateUserDto } from '../dtos/update-user.dto';
-import { CreateUserDto } from '../dtos/create-user.dto';
 import { Name } from './name.entity';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 

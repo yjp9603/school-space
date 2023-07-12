@@ -1,15 +1,13 @@
+import { SpaceUserRepository } from './repositories/spaces-user.repository';
 import {
-  BadRequestException,
-  ForbiddenException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateSpaceDto } from './dto/create-space.dto';
-import { UpdateSpaceDto } from './dto/update-space.dto';
 import { SpaceRepository } from './repositories/spaces.repository';
 import { Space } from './entities/space.entity';
-import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { SpaceUser } from './entities/space-user.entity';
@@ -23,6 +21,7 @@ export class SpacesService {
   constructor(
     private readonly spaceRepository: SpaceRepository,
     private readonly userRepository: UserRepository,
+    private readonly spaceUserRepository: SpaceUserRepository,
   ) {}
 
   /**
@@ -42,11 +41,10 @@ export class SpacesService {
         HttpErrorConstants.UNPROCESSABLE_ENTITY,
       );
     }
+
     const space = Space.from({
       spaceName: dto.spaceName,
       logo: dto.logo,
-      adminCode: dto.adminCode,
-      accessCode: dto.accessCode,
       user,
       roles: dto.roles,
     });
@@ -88,7 +86,49 @@ export class SpacesService {
 
   /**
    * 공간 참여
+   * @param joinCode
+   * @param userId
+   * @returns
    */
+  async joinSpace(joinCode: string, userId: number) {
+    // 1. 유저 조회
+    const user = await this.userRepository.findByUserId(userId);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    // 2. 입력한 참여 코드로 공간 조회
+    const space = await this.spaceRepository.findSpaceByJoinCode(joinCode);
+    if (!space) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+    }
+
+    // 3. 이미 참여중인 공간인지 확인
+    const existingSpaceUser = space.spaceUsers.find(
+      (spaceUser) => spaceUser.user.id === userId,
+    );
+    if (existingSpaceUser) {
+      throw new ConflictException(HttpErrorConstants.ALREADY_JOINED_SPACE);
+    }
+
+    // 4. 참여 코드에 맞는 권한을 부여 (관리자 or 참여자)
+    const roleType =
+      joinCode === space.adminCode ? RoleType.ADMIN : RoleType.PARTICIPANT;
+
+    const spaceRole = space.spaceRoles.find((role) => role.type === roleType);
+    if (!spaceRole) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_ROLE);
+    }
+
+    // 5. 공간의 구성원으로 추가
+    const newSpaceUser = SpaceUser.from(user, spaceRole);
+    newSpaceUser.setSpace(space);
+    space.addSpaceUser(newSpaceUser);
+
+    await this.spaceUserRepository.save(newSpaceUser);
+
+    return new CreateSpaceResponseDto(space);
+  }
 
   /**
    * 공간 삭제
@@ -100,17 +140,14 @@ export class SpacesService {
       spaceId,
       requestUserId,
     );
-    console.log(space);
 
     if (!space) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
     }
 
-    space.spaceUsers.map((spaceUser) => {
-      if (!spaceUser.isOwner) {
-        throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
-      }
-    });
+    if (!space.spaceUsers.some((spaceUser) => spaceUser.isOwner)) {
+      throw new NotFoundException(HttpErrorConstants.FORBIDDEN);
+    }
 
     await this.spaceRepository.softDelete(spaceId);
   }

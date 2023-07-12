@@ -7,23 +7,23 @@ import { RoleType } from '../constants/constants';
 
 @Entity()
 export class SpaceUser extends BaseEntity {
-  @Column()
+  @Column({ default: false })
   isOwner: boolean;
 
   @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne(() => Space, (space) => space.spaceUsers)
+  @ManyToOne(() => Space)
   space: Space;
 
-  @ManyToOne(() => SpaceRole, { nullable: false })
+  @ManyToOne(() => SpaceRole)
   spaceRole: SpaceRole;
 
   static from(user: User, spaceRole: SpaceRole) {
     const spaceUser = new SpaceUser();
     spaceUser.user = user;
     spaceUser.spaceRole = spaceRole;
-
+    spaceUser.isOwner = spaceRole.type === RoleType.ADMIN;
     return spaceUser;
   }
 
@@ -31,19 +31,15 @@ export class SpaceUser extends BaseEntity {
     this.space = space;
   }
 
-  public setOwner(spaceRoles: SpaceRole[]) {
-    this.isOwner = true;
-    const adminRole = spaceRoles.find((role) => role.type === RoleType.ADMIN);
-    if (adminRole) {
-      this.spaceRole = adminRole;
-    }
-  }
+  // public setOwner(spaceRoles: SpaceRole[]) {
+  //   this.isOwner = true;
+  //   const adminRole = spaceRoles.find((role) => role.type === RoleType.ADMIN);
+  //   if (adminRole) {
+  //     this.spaceRole = adminRole;
+  //   }
+  // }
 
-  public setRole(spaceRole: SpaceRole) {
-    this.spaceRole = spaceRole;
-  }
-
-  public setAsOwner() {
-    this.isOwner = true;
-  }
+  // public setRole(spaceRole: SpaceRole) {
+  //   this.spaceRole = spaceRole;
+  // }
 }
