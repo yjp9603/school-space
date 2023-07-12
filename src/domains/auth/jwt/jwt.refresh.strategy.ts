@@ -1,4 +1,4 @@
-import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';

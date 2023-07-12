@@ -12,7 +12,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
-import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Injectable()

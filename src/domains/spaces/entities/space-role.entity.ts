@@ -1,4 +1,4 @@
-import BaseEntity from 'src/core/entity/base.entity';
+import BaseEntity from 'src/common/entity/base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { RoleType } from '../constants/constants';
 import { Space } from 'src/domains/spaces/entities/space.entity';

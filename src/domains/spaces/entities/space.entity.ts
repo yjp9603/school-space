@@ -1,6 +1,6 @@
 import { User } from './../../users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import BaseEntity from 'src/core/entity/base.entity';
+import BaseEntity from 'src/common/entity/base.entity';
 import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';

@@ -1,7 +1,7 @@
 import { UserRepository } from './../users/repositories/user.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginUserDto } from './dtos/login-user.dto';
-import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

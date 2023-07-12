@@ -1,4 +1,4 @@
-import BaseEntity from 'src/core/entity/base.entity';
+import BaseEntity from 'src/common/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
@@ -6,7 +6,7 @@ import { Exclude } from 'class-transformer';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { Name } from './name.entity';
-import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 
 @Entity()
 export class User extends BaseEntity {

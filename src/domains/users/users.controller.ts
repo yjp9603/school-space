@@ -14,7 +14,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { Response } from 'express';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { User } from './entities/user.entity';
-import AuthUser from 'src/core/decorators/auth-user.decorator';
+import AuthUser from 'src/common/decorators/auth-user.decorator';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Controller('users')

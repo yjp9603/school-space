@@ -9,10 +9,12 @@ import { SpaceRepository } from './repositories/spaces.repository';
 import { Space } from './entities/space.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
-import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { SpaceUser } from './entities/space-user.entity';
 import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
 import { RoleType } from './constants/constants';
+import { Page, PageRequest } from 'src/common/page';
+import { SpaceListDto } from './dto/space-list.dto';
 
 @Injectable()
 export class SpacesService {
@@ -53,8 +55,17 @@ export class SpacesService {
     return result;
   }
 
-  findAll() {
-    return `This action returns all spaces`;
+  async findAllSpaceList(userId: number, pageRequest: PageRequest) {
+    const user = await this.userRepository.findByUserId(userId);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    const [spaceList, totalCount] =
+      await this.spaceRepository.findAndCountByUserId(userId, pageRequest);
+
+    const items = spaceList.map((space) => new SpaceListDto(space));
+    return new Page<SpaceListDto>(totalCount, items, pageRequest);
   }
 
   findOne(id: number) {

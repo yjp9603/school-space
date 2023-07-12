@@ -1,5 +1,5 @@
 import { Space } from './space.entity';
-import BaseEntity from 'src/core/entity/base.entity';
+import BaseEntity from 'src/common/entity/base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { SpaceRole } from './space-role.entity';

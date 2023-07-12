@@ -13,7 +13,7 @@ import { SpacesModule } from 'src/domains/spaces/spaces.module';
 import { UsersModule } from 'src/domains/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoggerMiddleware } from './core/middleware/logger.middleware';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AuthModule } from './domains/auth/auth.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 

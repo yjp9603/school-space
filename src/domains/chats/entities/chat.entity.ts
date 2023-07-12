@@ -1,4 +1,4 @@
-import BaseEntity from 'src/core/entity/base.entity';
+import BaseEntity from 'src/common/entity/base.entity';
 import { Post } from 'src/domains/posts/entities/post.entity';
 import { User } from 'src/domains/users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
