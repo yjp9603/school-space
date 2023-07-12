@@ -16,8 +16,4 @@ export class CreateSpaceDto {
     roleName: string;
     type: RoleType;
   }[];
-
-  // roleName: string;
-
-  // type: RoleType;
 }
