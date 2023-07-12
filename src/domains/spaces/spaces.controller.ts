@@ -51,11 +51,11 @@ export class SpacesController {
     return res.status(200).json(result);
   }
 
-  @Delete('/:id')
+  @Delete('/:spaceId')
   @UseAuthGuards()
   async deleteSpace(
     @Res() res: Response,
-    @Param('id') spaceId: number,
+    @Param('spaceId') spaceId: number,
     @AuthUser() user: User,
   ) {
     const result = await this.spacesService.deleteSpace(spaceId, user.id);
@@ -70,6 +70,39 @@ export class SpacesController {
     @AuthUser() user: User,
   ) {
     const result = await this.spacesService.joinSpace(dto.joinCode, user.id);
+    return res.status(201).json(result);
+  }
+
+  // space 권한 수정 (오너만)
+  @Patch('/:spaceId')
+  @UseAuthGuards()
+  async updateSpace(
+    @Res() res: Response,
+    @Param('spaceId') spaceId: number,
+    @Body() updateSpaceDto: UpdateSpaceDto,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.spacesService.updateSpace(
+      spaceId,
+      updateSpaceDto,
+      user.id,
+    );
+    return res.status(200).json(result);
+  }
+
+  @Delete('/:spaceId/role/:roleId')
+  @UseAuthGuards()
+  async deleteSpaceRole(
+    @Res() res: Response,
+    @Param('spaceId') spaceId: number,
+    @Param('roleId') roleId: number,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.spacesService.deleteSpaceRole(
+      spaceId,
+      roleId,
+      user.id,
+    );
     return res.status(200).json(result);
   }
 }

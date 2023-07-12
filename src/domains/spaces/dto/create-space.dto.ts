@@ -6,8 +6,6 @@ export class CreateSpaceDto {
 
   logo: string;
 
-  userId: number;
-
   @IsNotEmpty()
   roles: {
     roleName: string;

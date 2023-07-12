@@ -5,8 +5,15 @@ import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { UpdateSpaceDto } from '../dto/update-space.dto';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -59,29 +66,30 @@ export class Space extends BaseEntity {
     ];
     return space;
   }
-  addSpaceUser(spaceUser: SpaceUser) {
+
+  public addSpaceUser(spaceUser: SpaceUser) {
     this.spaceUsers.push(spaceUser);
     spaceUser.setSpace(this);
   }
 
-  addSpaceRole(spaceRole: SpaceRole) {
+  public addSpaceRole(spaceRole: SpaceRole) {
     this.spaceRoles.push(spaceRole);
     spaceRole.setSpace(this);
   }
 
-  public removeSpaceRole(spaceRoleId: number) {
-    const spaceRole = this.spaceRoles.find((role) => role.id === spaceRoleId);
-    if (!spaceRole) {
-      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_ROLE);
-    }
+  update(dto: UpdateSpaceDto) {
+    this.spaceName = dto.spaceName;
+    this.logo = dto.logo;
+    return this;
+  }
 
-    const isRoleInUse = this.spaceUsers.some(
-      (user) => user.spaceRole.id === spaceRoleId,
+  public validateUserAsOwner(userId: number) {
+    const isOwner = this.spaceUsers.some(
+      (spaceUser) => spaceUser.user.id === userId && spaceUser.isOwner,
     );
-    if (isRoleInUse) {
-      throw new BadRequestException();
-    }
 
-    this.spaceRoles = this.spaceRoles.filter((role) => role.id !== spaceRoleId);
+    if (!isOwner) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
   }
 }

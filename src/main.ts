@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { logger } from './common/middleware/winston';
 
 async function bootstrap() {
-  console.log(
+  logger.info(
     `================= API Start - ${process.env.NODE_ENV} !!=================`,
   );
   const app = await NestFactory.create(AppModule);

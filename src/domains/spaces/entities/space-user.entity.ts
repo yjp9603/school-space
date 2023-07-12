@@ -30,16 +30,4 @@ export class SpaceUser extends BaseEntity {
   public setSpace(space: Space) {
     this.space = space;
   }
-
-  // public setOwner(spaceRoles: SpaceRole[]) {
-  //   this.isOwner = true;
-  //   const adminRole = spaceRoles.find((role) => role.type === RoleType.ADMIN);
-  //   if (adminRole) {
-  //     this.spaceRole = adminRole;
-  //   }
-  // }
-
-  // public setRole(spaceRole: SpaceRole) {
-  //   this.spaceRole = spaceRole;
-  // }
 }

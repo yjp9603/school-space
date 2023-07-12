@@ -25,7 +25,6 @@ export class UsersService {
    */
   async createUser(dto: CreateUserDto): Promise<User> {
     const existEmail = await this.userRepository.existByEmail(dto.email);
-    console.log('existEmail::', existEmail);
     if (existEmail) {
       throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }

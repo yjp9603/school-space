@@ -73,4 +73,9 @@ export const HttpErrorConstants = {
     errorCode: 'ALREADY_JOINED_SPACE',
     message: '이미 참여한 공간입니다.',
   } as HttpErrorFormat,
+
+  ALREADY_USED_ROLE: {
+    errorCode: 'ALREADY_USED_ROLE',
+    message: '이미 사용중인 역할입니다.',
+  } as HttpErrorFormat,
 };

@@ -1,8 +1,11 @@
 import { SpaceUserRepository } from './repositories/spaces-user.repository';
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateSpaceDto } from './dto/create-space.dto';
@@ -15,6 +18,7 @@ import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
 import { RoleType } from './constants/constants';
 import { Page, PageRequest } from 'src/common/page';
 import { SpaceListDto } from './dto/space-list.dto';
+import { UpdateSpaceDto } from './dto/update-space.dto';
 
 @Injectable()
 export class SpacesService {
@@ -75,16 +79,6 @@ export class SpacesService {
   }
 
   /**
-   * 공간 구성원의 권한 변경 (또는 삭제)
-   * @param id
-   * @returns
-   */
-
-  /**
-   * 소유자 임명
-   */
-
-  /**
    * 공간 참여
    * @param joinCode
    * @param userId
@@ -131,12 +125,12 @@ export class SpacesService {
   }
 
   /**
-   * 공간 삭제
+   * 공간 삭제 (소유자만)
    * @param spaceId
    * @param requestUserId
    */
   async deleteSpace(spaceId: number, requestUserId: number) {
-    const space = await this.spaceRepository.findSpaceUserBySpaceIdAndUserId(
+    const space = await this.spaceRepository.findOwnerBySpaceIdAndUserId(
       spaceId,
       requestUserId,
     );
@@ -150,5 +144,69 @@ export class SpacesService {
     }
 
     await this.spaceRepository.softDelete(spaceId);
+  }
+
+  /**
+   * 공간 변경
+   * @param spaceId
+   * @param dto UpdateSpaceDto
+   * @param requestUserId
+   */
+  async updateSpace(
+    spaceId: number,
+    dto: UpdateSpaceDto,
+    requestUserId: number,
+  ) {
+    const space = await this.spaceRepository.findOne({
+      where: { id: spaceId },
+    });
+    if (!space) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+    }
+
+    // todo: 관리자인지 체크
+
+    space.update(dto);
+    return await this.spaceRepository.save(space);
+  }
+
+  /**
+   * 소유자 위임 (소유자만)
+   */
+
+  /**
+   * 공간의 역할 삭제 (관리자만)
+   * 단, 이미 사용중인 역할은 삭제 할 수 없다.
+   */
+  async deleteSpaceRole(
+    spaceId: number,
+    requestRoleId: number,
+    requestUserId: number,
+  ) {
+    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+      spaceId,
+    );
+
+    console.log('space::', space);
+
+    if (!space) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+    }
+
+    const a = space.validateUserAsOwner(requestUserId);
+    console.log('a::', a);
+
+    const isUsedRole = space.spaceUsers.some(
+      (spaceUser) =>
+        spaceUser.spaceRole && spaceUser.spaceRole.id === requestRoleId,
+    );
+    console.log('isUsedRole::', isUsedRole);
+
+    if (isUsedRole) {
+      throw new ConflictException(HttpErrorConstants.ALREADY_USED_ROLE);
+    }
+
+    // Delete the role from the database
+    await this.spaceRepository.deleteRole(requestRoleId);
   }
 }
