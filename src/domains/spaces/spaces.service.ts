@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 import { SpaceUser } from './entities/space-user.entity';
+import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
 
 @Injectable()
 export class SpacesService {
@@ -22,7 +23,6 @@ export class SpacesService {
    * @returns 생성한 스페이스 인덱스
    */
   async createSpace(dto: CreateSpaceDto, requestUserId: number) {
-    console.log('dto::', dto);
     const user = await this.userRepository.findByUserId(requestUserId);
     if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
@@ -36,10 +36,11 @@ export class SpacesService {
       user,
       roles: dto.roles,
     });
-    console.log('space::', space);
 
     await this.spaceRepository.save(space);
-    return space.id;
+
+    const result = new CreateSpaceResponseDto(space);
+    return result;
   }
 
   findAll() {

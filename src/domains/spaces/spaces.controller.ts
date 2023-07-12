@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { SpacesService } from './spaces.service';
 import { CreateSpaceDto } from './dto/create-space.dto';
@@ -13,6 +14,7 @@ import { UpdateSpaceDto } from './dto/update-space.dto';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { User } from '../users/entities/user.entity';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
+import { Response } from 'express';
 
 @Controller('spaces')
 export class SpacesController {
@@ -21,6 +23,7 @@ export class SpacesController {
   @Post()
   @UseAuthGuards()
   async createSpace(
+    @Res() res: Response,
     @Body() createSpaceDto: CreateSpaceDto,
     @AuthUser() user: User,
   ) {
@@ -28,7 +31,7 @@ export class SpacesController {
       createSpaceDto,
       user.id,
     );
-    return result;
+    return res.status(201).json(result);
   }
 
   @Get()
