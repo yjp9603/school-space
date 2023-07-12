@@ -12,7 +12,12 @@ export class CreateSpaceDto {
 
   accessCode: string;
 
-  roleName: string;
+  roles: {
+    roleName: string;
+    type: RoleType;
+  }[];
 
-  type: RoleType;
+  // roleName: string;
+
+  // type: RoleType;
 }

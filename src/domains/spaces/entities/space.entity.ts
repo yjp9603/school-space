@@ -4,6 +4,7 @@ import BaseEntity from 'src/core/entity/base.entity';
 import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -35,16 +36,14 @@ export class Space extends BaseEntity {
     adminCode,
     accessCode,
     user,
-    roleName,
-    type,
+    roles,
   }: {
     spaceName: string;
     logo: string;
     adminCode: string;
     accessCode: string;
     user: User;
-    roleName: string;
-    type: RoleType;
+    roles: { roleName: string; type: RoleType }[];
   }) {
     const space = new Space();
     space.spaceName = spaceName;
@@ -52,10 +51,17 @@ export class Space extends BaseEntity {
     space.adminCode = adminCode;
     space.accessCode = accessCode;
 
-    const spaceRole = SpaceRole.from(roleName, type);
-    space.addSpaceRole(spaceRole);
+    const spaceRoles = roles.map((role) => {
+      const spaceRole = SpaceRole.from(role.roleName, role.type);
+      space.addSpaceRole(spaceRole);
 
-    const spaceUser = SpaceUser.from(user, spaceRole);
+      return spaceRole;
+    });
+
+    const spaceUser = SpaceUser.from(
+      user,
+      spaceRoles.find((role) => role.type === RoleType.ADMIN),
+    );
     spaceUser.setOwner();
     space.addSpaceUser(spaceUser);
 
@@ -82,5 +88,25 @@ export class Space extends BaseEntity {
       ? this.setSpaceRole(spaceRole)
       : this.spaceRoles.push(spaceRole);
     spaceRole.setSpace(this);
+  }
+
+  public removeSpaceRole(spaceRoleId: number) {
+    const spaceRole = this.spaceRoles.find((role) => role.id === spaceRoleId);
+    if (!spaceRole) {
+      throw new NotFoundException(
+        `Cannot find SpaceRole with id: ${spaceRoleId}`,
+      );
+    }
+
+    const isRoleInUse = this.spaceUsers.some(
+      (user) => user.spaceRole.id === spaceRoleId,
+    );
+    if (isRoleInUse) {
+      throw new BadRequestException(
+        `Cannot delete role with id: ${spaceRoleId}, it is currently in use.`,
+      );
+    }
+
+    this.spaceRoles = this.spaceRoles.filter((role) => role.id !== spaceRoleId);
   }
 }

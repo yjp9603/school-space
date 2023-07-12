@@ -22,6 +22,7 @@ export class SpacesService {
    * @returns 생성한 스페이스 인덱스
    */
   async createSpace(dto: CreateSpaceDto, requestUserId: number) {
+    console.log('dto::', dto);
     const user = await this.userRepository.findByUserId(requestUserId);
     if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
@@ -33,9 +34,9 @@ export class SpacesService {
       adminCode: dto.adminCode,
       accessCode: dto.accessCode,
       user,
-      roleName: dto.roleName,
-      type: dto.type,
+      roles: dto.roles,
     });
+    console.log('space::', space);
 
     await this.spaceRepository.save(space);
     return space.id;

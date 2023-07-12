@@ -24,7 +24,11 @@ export class SpacesController {
     @Body() createSpaceDto: CreateSpaceDto,
     @AuthUser() user: User,
   ) {
-    return await this.spacesService.createSpace(createSpaceDto, user.id);
+    const result = await this.spacesService.createSpace(
+      createSpaceDto,
+      user.id,
+    );
+    return result;
   }
 
   @Get()

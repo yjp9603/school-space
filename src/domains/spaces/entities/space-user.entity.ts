@@ -15,7 +15,7 @@ export class SpaceUser extends BaseEntity {
   @ManyToOne(() => Space, (space) => space.spaceUsers)
   space: Space;
 
-  @ManyToOne(() => SpaceRole)
+  @ManyToOne(() => SpaceRole, { nullable: false })
   spaceRole: SpaceRole;
 
   static from(user: User, spaceRole: SpaceRole) {
