@@ -11,6 +11,7 @@ export class SpaceRole extends BaseEntity {
   roleName: string;
 
   @Column({
+    comment: 'sqlite 에서는 enum 타입을 지원하지 않아 varchar 로 대체',
     type: 'varchar',
     nullable: false,
   })
@@ -30,5 +31,9 @@ export class SpaceRole extends BaseEntity {
 
   public setSpace(space: Space) {
     this.space = space;
+  }
+
+  public changeType(newType: RoleType) {
+    this.type = newType;
   }
 }

@@ -5,15 +5,9 @@ import { SpaceUser } from './space-user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
-import { UpdateSpaceDto } from '../dto/update-space.dto';
+import { UpdateSpaceRoleTypeDto } from '../dto/update-space-role-type.dto';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -64,6 +58,7 @@ export class Space extends BaseEntity {
         space.spaceRoles.find((role) => role.type === RoleType.ADMIN),
       ),
     ];
+
     return space;
   }
 
@@ -77,12 +72,6 @@ export class Space extends BaseEntity {
     spaceRole.setSpace(this);
   }
 
-  update(dto: UpdateSpaceDto) {
-    this.spaceName = dto.spaceName;
-    this.logo = dto.logo;
-    return this;
-  }
-
   public validateUserAsOwner(userId: number) {
     const isOwner = this.spaceUsers.some(
       (spaceUser) => spaceUser.user.id === userId && spaceUser.isOwner,
@@ -91,5 +80,34 @@ export class Space extends BaseEntity {
     if (!isOwner) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }
+  }
+
+  public changeRoleType(roleId: number, newType: RoleType): SpaceRole | null {
+    const roleToChange = this.spaceRoles.find((role) => role.id === roleId);
+
+    if (!roleToChange) {
+      return null;
+    }
+
+    roleToChange.changeType(newType);
+    return roleToChange;
+  }
+
+  public assignNewOwner(newOwnerId: number): void {
+    const oldOwner = this.spaceUsers.find((spaceUser) => spaceUser.isOwner);
+    const newOwner = this.spaceUsers.find(
+      (spaceUser) => spaceUser.user.id === newOwnerId,
+    );
+
+    if (!newOwner) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    if (oldOwner === newOwner) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+
+    oldOwner?.changeOwner(false);
+    newOwner.changeOwner(true);
   }
 }

@@ -6,7 +6,9 @@ export class CreateSpaceDto {
 
   logo: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({
+    message: 'sqlite에서 enum 타입을 지원하지 않아 DTO에서 validation',
+  })
   roles: {
     roleName: string;
     type: RoleType;

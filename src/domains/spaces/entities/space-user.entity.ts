@@ -30,4 +30,8 @@ export class SpaceUser extends BaseEntity {
   public setSpace(space: Space) {
     this.space = space;
   }
+
+  public changeOwner(isOwner: boolean): void {
+    this.isOwner = isOwner;
+  }
 }

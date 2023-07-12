@@ -8,16 +8,17 @@ import {
   Delete,
   Res,
   Query,
+  Put,
 } from '@nestjs/common';
 import { SpacesService } from './spaces.service';
 import { CreateSpaceDto } from './dto/create-space.dto';
-import { UpdateSpaceDto } from './dto/update-space.dto';
 import AuthUser from 'src/common/decorators/auth-user.decorator';
 import { User } from '../users/entities/user.entity';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { Response } from 'express';
 import { PageRequest } from 'src/common/page';
 import { JoinSpaceDto } from './dto/join-space.dto';
+import { UpdateSpaceRoleTypeDto } from './dto/update-space-role-type.dto';
 
 @Controller('spaces')
 export class SpacesController {
@@ -73,18 +74,19 @@ export class SpacesController {
     return res.status(201).json(result);
   }
 
-  // space 권한 수정 (오너만)
-  @Patch('/:spaceId')
+  @Patch('/:spaceId/role/:roleId')
   @UseAuthGuards()
-  async updateSpace(
+  async updateRoleType(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
-    @Body() updateSpaceDto: UpdateSpaceDto,
+    @Param('roleId') roleId: number,
+    @Body() dto: UpdateSpaceRoleTypeDto,
     @AuthUser() user: User,
   ) {
-    const result = await this.spacesService.updateSpace(
+    const result = await this.spacesService.updateRoleType(
       spaceId,
-      updateSpaceDto,
+      roleId,
+      dto,
       user.id,
     );
     return res.status(200).json(result);
@@ -103,6 +105,16 @@ export class SpacesController {
       roleId,
       user.id,
     );
+    return res.status(200).json(result);
+  }
+  @Patch(':spaceId/newOwner/:userId')
+  @UseAuthGuards()
+  async changeOwner(
+    @Res() res: Response,
+    @Param('spaceId') spaceId: number,
+    @Param('userId') userId: number,
+  ) {
+    const result = await this.spacesService.changeOwner(spaceId, userId);
     return res.status(200).json(result);
   }
 }

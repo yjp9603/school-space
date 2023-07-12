@@ -1,11 +1,8 @@
 import { SpaceUserRepository } from './repositories/spaces-user.repository';
 import {
-  BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateSpaceDto } from './dto/create-space.dto';
@@ -18,7 +15,8 @@ import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
 import { RoleType } from './constants/constants';
 import { Page, PageRequest } from 'src/common/page';
 import { SpaceListDto } from './dto/space-list.dto';
-import { UpdateSpaceDto } from './dto/update-space.dto';
+import { UpdateSpaceRoleTypeDto } from './dto/update-space-role-type.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class SpacesService {
@@ -147,32 +145,54 @@ export class SpacesService {
   }
 
   /**
-   * 공간 변경
+   * 권한 변경 (소유자만)
    * @param spaceId
-   * @param dto UpdateSpaceDto
+   * @param roleId
+   * @param dto UpdateSpaceRoleTypeDto
    * @param requestUserId
    */
-  async updateSpace(
+  async updateRoleType(
     spaceId: number,
-    dto: UpdateSpaceDto,
-    requestUserId: number,
+    roleId: number,
+    dto: UpdateSpaceRoleTypeDto,
+    userid: number,
   ) {
-    const space = await this.spaceRepository.findOne({
-      where: { id: spaceId },
-    });
+    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+      spaceId,
+    );
     if (!space) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
     }
 
-    // todo: 관리자인지 체크
+    space.validateUserAsOwner(userid);
 
-    space.update(dto);
-    return await this.spaceRepository.save(space);
+    const changedRole = space.changeRoleType(roleId, dto.type);
+    if (!changedRole) {
+      return null;
+    }
+
+    await this.spaceRepository.save(space);
+
+    return changedRole;
   }
 
   /**
-   * 소유자 위임 (소유자만)
+   * 소유자 변경 (소유자만)
    */
+  async changeOwner(spaceId: number, newOwnerId: number): Promise<Space> {
+    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+      spaceId,
+    );
+
+    if (!space) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+    }
+
+    space.validateUserAsOwner(newOwnerId);
+    space.assignNewOwner(newOwnerId);
+
+    return await this.spaceRepository.save(space);
+  }
 
   /**
    * 공간의 역할 삭제 (관리자만)
@@ -186,27 +206,21 @@ export class SpacesService {
     const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
       spaceId,
     );
-
-    console.log('space::', space);
-
     if (!space) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
     }
 
-    const a = space.validateUserAsOwner(requestUserId);
-    console.log('a::', a);
+    space.validateUserAsOwner(requestUserId);
 
     const isUsedRole = space.spaceUsers.some(
       (spaceUser) =>
         spaceUser.spaceRole && spaceUser.spaceRole.id === requestRoleId,
     );
-    console.log('isUsedRole::', isUsedRole);
 
     if (isUsedRole) {
       throw new ConflictException(HttpErrorConstants.ALREADY_USED_ROLE);
     }
 
-    // Delete the role from the database
     await this.spaceRepository.deleteRole(requestRoleId);
   }
 }
