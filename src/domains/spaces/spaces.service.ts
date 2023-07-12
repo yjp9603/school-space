@@ -5,17 +5,17 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateSpaceDto } from './dto/create-space.dto';
+import { CreateSpaceDto } from './dtos/create-space.dto';
 import { SpaceRepository } from './repositories/spaces.repository';
 import { Space } from './entities/space.entity';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { SpaceUser } from './entities/space-user.entity';
-import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
+import { CreateSpaceResponseDto } from './dtos/create-space-response.dto';
 import { RoleType } from './constants/constants';
 import { Page, PageRequest } from 'src/common/page';
-import { SpaceListDto } from './dto/space-list.dto';
-import { UpdateSpaceRoleTypeDto } from './dto/update-space-role-type.dto';
+import { SpaceListDto } from './dtos/space-list.dto';
+import { UpdateSpaceRoleTypeDto } from './dtos/update-space-role-type.dto';
 import { User } from '../users/entities/user.entity';
 
 @Injectable()

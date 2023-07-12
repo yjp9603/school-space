@@ -7,7 +7,6 @@ import { RoleType } from '../constants/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
-import { UpdateSpaceRoleTypeDto } from '../dto/update-space-role-type.dto';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
