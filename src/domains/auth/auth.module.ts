@@ -15,7 +15,7 @@ import { JwtRefreshStrategy } from './jwt/jwt.refresh.strategy';
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
         signOptions: {
-          expiresIn: '10h',
+          expiresIn: '1h',
         },
       }),
     }),
