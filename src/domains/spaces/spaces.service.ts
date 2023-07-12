@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateSpaceDto } from './dto/create-space.dto';
 import { UpdateSpaceDto } from './dto/update-space.dto';
 import { SpaceRepository } from './repositories/spaces.repository';
@@ -8,6 +12,7 @@ import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 import { SpaceUser } from './entities/space-user.entity';
 import { CreateSpaceResponseDto } from './dto/create-space-response.dto';
+import { RoleType } from './constants/constants';
 
 @Injectable()
 export class SpacesService {
@@ -28,6 +33,11 @@ export class SpacesService {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
     }
 
+    if (!dto.roles || !dto.roles.find((role) => role.type === RoleType.ADMIN)) {
+      throw new UnprocessableEntityException(
+        HttpErrorConstants.UNPROCESSABLE_ENTITY,
+      );
+    }
     const space = Space.from({
       spaceName: dto.spaceName,
       logo: dto.logo,

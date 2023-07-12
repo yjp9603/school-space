@@ -3,6 +3,7 @@ import BaseEntity from 'src/core/entity/base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { SpaceRole } from './space-role.entity';
+import { RoleType } from '../constants/constants';
 
 @Entity()
 export class SpaceUser extends BaseEntity {
@@ -30,7 +31,11 @@ export class SpaceUser extends BaseEntity {
     this.space = space;
   }
 
-  public setOwner() {
+  public setOwner(spaceRoles: SpaceRole[]) {
     this.isOwner = true;
+    const adminRole = spaceRoles.find((role) => role.type === RoleType.ADMIN);
+    if (adminRole) {
+      this.spaceRole = adminRole;
+    }
   }
 }

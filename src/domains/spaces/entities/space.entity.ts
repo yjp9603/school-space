@@ -62,7 +62,7 @@ export class Space extends BaseEntity {
       user,
       spaceRoles.find((role) => role.type === RoleType.ADMIN),
     );
-    spaceUser.setOwner();
+    spaceUser.setOwner(spaceRoles);
     space.addSpaceUser(spaceUser);
 
     return space;

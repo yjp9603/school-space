@@ -53,4 +53,9 @@ export const HttpErrorConstants = {
     errorCode: 'CANNOT_FIND_CHAT',
     message: '댓글을 찾을 수 없습니다.',
   } as HttpErrorFormat,
+
+  UNPROCESSABLE_ENTITY: {
+    errorCode: 'UNPROCESSABLE_ENTITY',
+    message: '필수값을 보내지 않았습니다.',
+  } as HttpErrorFormat,
 };
