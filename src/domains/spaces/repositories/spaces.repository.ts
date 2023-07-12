@@ -13,4 +13,21 @@ export class SpaceRepository extends Repository<Space> {
       .skip(pageRequest.offset)
       .getManyAndCount();
   }
+
+  findByUserId(userId: number) {
+    return this.createQueryBuilder('space')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.user', 'user')
+      .where('user.id = :userId', { userId })
+      .getMany();
+  }
+
+  findSpaceUserBySpaceIdAndUserId(spaceId: number, userId: number) {
+    return this.createQueryBuilder('space')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.user', 'user')
+      .where('space.id = :spaceId', { spaceId })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
+  }
 }

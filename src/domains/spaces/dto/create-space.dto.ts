@@ -12,6 +12,7 @@ export class CreateSpaceDto {
 
   accessCode: string;
 
+  @IsNotEmpty()
   roles: {
     roleName: string;
     type: RoleType;

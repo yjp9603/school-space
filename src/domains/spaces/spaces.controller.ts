@@ -50,18 +50,14 @@ export class SpacesController {
     return res.status(200).json(result);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.spacesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSpaceDto: UpdateSpaceDto) {
-    return this.spacesService.update(+id, updateSpaceDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.spacesService.remove(+id);
+  @UseAuthGuards()
+  @Delete('/:id')
+  async deleteSpace(
+    @Res() res: Response,
+    @Param('id') spaceId: number,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.spacesService.deleteSpace(spaceId, user.id);
+    return res.status(200).json(result);
   }
 }

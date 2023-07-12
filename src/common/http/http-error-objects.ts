@@ -34,6 +34,11 @@ export const HttpErrorConstants = {
     message: '유저를 찾을 수 없습니다.',
   } as HttpErrorFormat,
 
+  CANNOT_FIND_SPACE: {
+    errorCode: 'CANNOT_FIND_SPACE',
+    message: '공간을 찾을 수 없습니다.',
+  } as HttpErrorFormat,
+
   EXPIRED_ACCESS_TOKEN: {
     errorCode: 'EXPIRED_ACCESS_TOKEN',
     message: '액세스 토큰이 만료되었습니다.',

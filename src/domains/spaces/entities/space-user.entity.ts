@@ -38,4 +38,12 @@ export class SpaceUser extends BaseEntity {
       this.spaceRole = adminRole;
     }
   }
+
+  public setRole(spaceRole: SpaceRole) {
+    this.spaceRole = spaceRole;
+  }
+
+  public setAsOwner() {
+    this.isOwner = true;
+  }
 }

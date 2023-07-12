@@ -1,4 +1,6 @@
 import {
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -55,6 +57,12 @@ export class SpacesService {
     return result;
   }
 
+  /**
+   * 유저의 공간 목록 조회
+   * @param userId
+   * @param pageRequest
+   * @returns
+   */
   async findAllSpaceList(userId: number, pageRequest: PageRequest) {
     const user = await this.userRepository.findByUserId(userId);
     if (!user) {
@@ -68,15 +76,42 @@ export class SpacesService {
     return new Page<SpaceListDto>(totalCount, items, pageRequest);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} space`;
-  }
+  /**
+   * 공간 구성원의 권한 변경 (또는 삭제)
+   * @param id
+   * @returns
+   */
 
-  update(id: number, updateSpaceDto: UpdateSpaceDto) {
-    return `This action updates a #${id} space`;
-  }
+  /**
+   * 소유자 임명
+   */
 
-  remove(id: number) {
-    return `This action removes a #${id} space`;
+  /**
+   * 공간 참여
+   */
+
+  /**
+   * 공간 삭제
+   * @param spaceId
+   * @param requestUserId
+   */
+  async deleteSpace(spaceId: number, requestUserId: number) {
+    const space = await this.spaceRepository.findSpaceUserBySpaceIdAndUserId(
+      spaceId,
+      requestUserId,
+    );
+    console.log(space);
+
+    if (!space) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+    }
+
+    space.spaceUsers.map((spaceUser) => {
+      if (!spaceUser.isOwner) {
+        throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+      }
+    });
+
+    await this.spaceRepository.softDelete(spaceId);
   }
 }
