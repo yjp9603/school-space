@@ -14,7 +14,6 @@ import { SpacesService } from './spaces.service';
 import { CreateSpaceDto } from './dtos/create-space.dto';
 import AuthUser from 'src/common/decorators/auth-user.decorator';
 import { User } from '../users/entities/user.entity';
-// import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { Response } from 'express';
 import { PageRequest } from 'src/common/page';
 import { JoinSpaceDto } from './dtos/join-space.dto';
@@ -40,7 +39,7 @@ export class SpacesController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async findAllSpaceList(
     @Res() res: Response,
     @AuthUser() user: User,
@@ -54,7 +53,7 @@ export class SpacesController {
   }
 
   @Delete('/:spaceId')
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async deleteSpace(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -65,7 +64,7 @@ export class SpacesController {
   }
 
   @Post('/join')
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async joinSpace(
     @Res() res: Response,
     @Body() dto: JoinSpaceDto,
@@ -76,7 +75,7 @@ export class SpacesController {
   }
 
   @Patch('/:spaceId/role/:roleId')
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async updateRoleType(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -94,7 +93,7 @@ export class SpacesController {
   }
 
   @Delete('/:spaceId/role/:roleId')
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async deleteSpaceRole(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -110,7 +109,7 @@ export class SpacesController {
   }
 
   @Patch(':spaceId/newOwner/:userId')
-  @UseGuards(AuthGuard)()
+  @UseGuards(AuthGuard)
   async changeOwner(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
