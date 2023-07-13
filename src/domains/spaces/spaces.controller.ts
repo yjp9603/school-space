@@ -106,6 +106,7 @@ export class SpacesController {
     );
     return res.status(200).json(result);
   }
+
   @Patch(':spaceId/newOwner/:userId')
   @UseAuthGuards()
   async changeOwner(
