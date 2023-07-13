@@ -18,14 +18,14 @@ export class UsersController {
     return res.status(201).json(result.id);
   }
 
-  @UseAuthGuards()
+  @UseGuards(AuthGuard)()
   @Get('/:id')
   async findUser(@Res() res, @Param('id') id: number, @AuthUser() user: User) {
     const result = await this.usersService.findUser(id, user);
     return res.status(200).json(result);
   }
 
-  @UseAuthGuards()
+  @UseGuards(AuthGuard)()
   @Patch('/:id')
   async updateUser(
     @Res() res,
@@ -37,7 +37,7 @@ export class UsersController {
     return res.status(200).json(result.id);
   }
 
-  @UseAuthGuards()
+  @UseGuards(AuthGuard)()
   @Patch('/password')
   async updatePassword(
     @Res() res,
