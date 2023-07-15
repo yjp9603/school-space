@@ -26,10 +26,10 @@ export class Space extends BaseEntity {
   @Column()
   accessCode: string;
 
-  @OneToMany(() => SpaceRole, (spaceRole) => spaceRole.space, { cascade: true })
+  @OneToMany(() => SpaceRole, (spaceRole) => spaceRole.space, { cascade: true }) // Space 추가되면 SpaceRole도 추가
   spaceRoles: SpaceRole[];
 
-  @OneToMany(() => SpaceUser, (spaceUser) => spaceUser.space, { cascade: true })
+  @OneToMany(() => SpaceUser, (spaceUser) => spaceUser.space, { cascade: true }) // Space 추가되면 SpaceUser도 추가
   spaceUsers: SpaceUser[];
 
   static from({
@@ -108,5 +108,13 @@ export class Space extends BaseEntity {
 
     oldOwner?.changeOwner(false);
     newOwner.changeOwner(true);
+  }
+
+  public getUserRoleInSpace(user: User): SpaceRole {
+    // 스페이스 유저와 스페이스 사이의 관계를 찾아서 스페이스 유저의 역할을 반환
+    const spaceUser = this.spaceUsers.find(
+      (spaceUser) => spaceUser.user.id === user.id,
+    );
+    return spaceUser ? spaceUser.spaceRole : null;
   }
 }

@@ -1,11 +1,12 @@
 import BaseEntity from 'src/common/entity/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { Exclude } from 'class-transformer';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { Name } from './name.entity';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { SpaceUser } from 'src/domains/spaces/entities/space-user.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -36,6 +37,9 @@ export class User extends BaseEntity {
     nullable: true,
   })
   refreshToken: string;
+
+  @OneToMany(() => SpaceUser, (spaceUser) => spaceUser.user)
+  spaceUsers: SpaceUser[];
 
   static async from({
     email,

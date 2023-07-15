@@ -1,6 +1,6 @@
 import { Space } from './space.entity';
 import BaseEntity from 'src/common/entity/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { SpaceRole } from './space-role.entity';
 import { RoleType } from '../constants/constants';
@@ -10,7 +10,8 @@ export class SpaceUser extends BaseEntity {
   @Column({ default: false })
   isOwner: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.spaceUsers)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Space)

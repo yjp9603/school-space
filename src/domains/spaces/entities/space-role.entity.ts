@@ -3,6 +3,9 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 import { RoleType } from '../constants/constants';
 import { Space } from 'src/domains/spaces/entities/space.entity';
 import { IsEnum } from 'class-validator';
+import { PostType } from 'src/domains/posts/constants/constants';
+import { ForbiddenException } from '@nestjs/common';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 @Entity()
 export class SpaceRole extends BaseEntity {
   @Column({
@@ -35,5 +38,14 @@ export class SpaceRole extends BaseEntity {
 
   public changeType(newType: RoleType) {
     this.type = newType;
+  }
+
+  public validatePostCreation(postType: PostType, isAnonymous: boolean): void {
+    if (postType === PostType.NOTICE && this.type !== RoleType.ADMIN) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+    if (isAnonymous && this.type !== RoleType.PARTICIPANT) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
   }
 }

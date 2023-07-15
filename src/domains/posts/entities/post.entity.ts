@@ -1,5 +1,5 @@
 import { User } from './../../users/entities/user.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import BaseEntity from 'src/common/entity/base.entity';
 import { Space } from 'src/domains/spaces/entities/space.entity';
 import { PostType } from '../constants/constants';
@@ -7,30 +7,54 @@ import { RoleType } from 'src/domains/spaces/constants/constants';
 import { Chat } from 'src/domains/chats/entities/chat.entity';
 @Entity()
 export class Post extends BaseEntity {
-  @Column()
+  @Column({
+    comment: '게시글 내용',
+  })
   content: string;
 
-  @Column()
-  isAnonymous: boolean;
-
   @Column({
-    comment: 'sqlite 에서는 enum 타입을 지원하지 않아 varchar 로 대체',
+    comment: '게시글 타입 (질문, 공지)',
     type: 'varchar',
     default: PostType.QUESTION,
   })
-  postType: PostType;
+  type: PostType;
 
-  @Column()
-  authorRoleType: RoleType;
+  @Column({
+    comment: '익명 여부',
+  })
+  isAnonymous: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' }) // 유저 - 포스트는 1:N 관계이므로 N쪽에 적용. 유저 삭제시 게시글 삭제
+  @JoinColumn({ name: 'user_id' })
   author: User;
 
-  @ManyToOne(() => Space)
+  @ManyToOne(() => Space) // 스페이스 - 포스트는 1:N 관계이므로 N쪽에 적용. 공간 하나에 여러개의 게시글
+  @JoinColumn({ name: 'space_id' })
   space: Space;
 
-  @ManyToOne(() => Chat)
-  chat: Chat;
+  static from({
+    content,
+    isAnonymous,
+    type,
+    user,
+    space,
+  }: {
+    content: string;
+    isAnonymous: boolean;
+    type: PostType;
+    user: User;
+    space: Space;
+  }) {
+    const post = new Post();
+
+    post.content = content;
+    post.isAnonymous = isAnonymous;
+    post.type = type;
+    post.author = user;
+    post.space = space;
+
+    return post;
+  }
 
   canDeletePost(currentUserId: number, currentUserRoleType: RoleType): boolean {
     return (

@@ -78,4 +78,9 @@ export const HttpErrorConstants = {
     errorCode: 'ALREADY_USED_ROLE',
     message: '이미 사용중인 역할입니다.',
   } as HttpErrorFormat,
+
+  FORBIDDEN_ANONYMOUS: {
+    errorCode: 'FORBIDDEN_ANONYMOUS',
+    message: '익명 작성은 참가자만 가능합니다.',
+  } as HttpErrorFormat,
 };

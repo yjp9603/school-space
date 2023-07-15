@@ -32,12 +32,19 @@ export class SpaceRepository extends Repository<Space> {
       .getOne();
   }
 
-  async findSpaceByJoinCode(joinCode: string) {
+  async findSpaceByJoinCode(joinCode: string, userId: number) {
     return await this.createQueryBuilder('space')
+      .leftJoinAndSelect(
+        'space.spaceUsers',
+        'spaceUser',
+        'spaceUser.user_id = :userId',
+        { userId },
+      )
       .leftJoinAndSelect('space.spaceRoles', 'spaceRole')
       .where('space.adminCode = :joinCode OR space.accessCode = :joinCode', {
         joinCode,
       })
+      // .andWhere('spaceUser.user_id = :userId', { userId })
       .getOne();
   }
 

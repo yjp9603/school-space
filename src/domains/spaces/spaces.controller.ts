@@ -19,13 +19,14 @@ import { PageRequest } from 'src/common/page';
 import { JoinSpaceDto } from './dtos/join-space.dto';
 import { UpdateSpaceRoleTypeDto } from './dtos/update-space-role-type.dto';
 import { AuthGuard } from '@nestjs/passport';
+import UseAuthGuards from '../auth/auth-guards/user-auth';
 
 @Controller('spaces')
 export class SpacesController {
   constructor(private readonly spacesService: SpacesService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async createSpace(
     @Res() res: Response,
     @Body() createSpaceDto: CreateSpaceDto,
@@ -39,7 +40,7 @@ export class SpacesController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async findAllSpaceList(
     @Res() res: Response,
     @AuthUser() user: User,
@@ -53,7 +54,7 @@ export class SpacesController {
   }
 
   @Delete('/:spaceId')
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async deleteSpace(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -64,7 +65,7 @@ export class SpacesController {
   }
 
   @Post('/join')
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async joinSpace(
     @Res() res: Response,
     @Body() dto: JoinSpaceDto,
@@ -75,7 +76,7 @@ export class SpacesController {
   }
 
   @Patch('/:spaceId/role/:roleId')
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async updateRoleType(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -93,7 +94,7 @@ export class SpacesController {
   }
 
   @Delete('/:spaceId/role/:roleId')
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async deleteSpaceRole(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
@@ -109,7 +110,7 @@ export class SpacesController {
   }
 
   @Patch(':spaceId/newOwner/:userId')
-  @UseGuards(AuthGuard)
+  @UseAuthGuards()
   async changeOwner(
     @Res() res: Response,
     @Param('spaceId') spaceId: number,
