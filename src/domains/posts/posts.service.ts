@@ -46,7 +46,10 @@ export class PostsService {
     }
 
     // 3. 익명 유저로 작성할 수 있는 참여자인지 체크
-    if (spaceUser.spaceRole.type !== RoleType.PARTICIPANT && dto.isAnonymous) {
+    if (
+      spaceUser.spaceRole.type !== RoleType.PARTICIPANT &&
+      dto.isAnonymous === true
+    ) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN_ANONYMOUS);
     }
 
@@ -62,7 +65,7 @@ export class PostsService {
     //5.저장
     await this.postRepository.save(post);
 
-    return { result: post.id };
+    return { postId: post.id };
   }
 
   findAll() {

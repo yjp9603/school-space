@@ -6,6 +6,8 @@ import { IsEnum } from 'class-validator';
 import { PostType } from 'src/domains/posts/constants/constants';
 import { ForbiddenException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { CreatePostDto } from 'src/domains/posts/dtos/create-post.dto';
+import { User } from 'src/domains/users/entities/user.entity';
 @Entity()
 export class SpaceRole extends BaseEntity {
   @Column({
@@ -40,11 +42,11 @@ export class SpaceRole extends BaseEntity {
     this.type = newType;
   }
 
-  public validatePostCreation(postType: PostType, isAnonymous: boolean): void {
-    if (postType === PostType.NOTICE && this.type !== RoleType.ADMIN) {
+  public validatePostCreation(user: User, dto: CreatePostDto): void {
+    if (dto.type === PostType.NOTICE && this.type !== RoleType.ADMIN) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }
-    if (isAnonymous && this.type !== RoleType.PARTICIPANT) {
+    if (dto.isAnonymous && this.type !== RoleType.PARTICIPANT) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }
   }

@@ -26,7 +26,6 @@ export class UserRepository extends Repository<User> {
     await this.update({ id: userId }, { password: newPassword });
   }
 
-  // 유저가 참여하고 있는 Space를 찾고, 해당 Space에서의 권한을 찾아야함
   async findSpaceRoleBySpaceId(userId: number, spaceId: number) {
     return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.spaceUsers', 'spaceUser')
