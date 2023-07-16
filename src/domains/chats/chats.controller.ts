@@ -46,8 +46,14 @@ export class ChatsController {
     return this.chatsService.update(+id, updateChatDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatsService.remove(+id);
+  @Delete(':chatId')
+  @UseAuthGuards()
+  async deleteChat(
+    @Res() res: Response,
+    @Param('chatId') chatId: number,
+    @AuthUser() user: User,
+  ) {
+    const result = this.chatsService.deleteChat(+chatId, user.id);
+    return res.status(200).json(result);
   }
 }

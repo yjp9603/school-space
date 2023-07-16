@@ -65,7 +65,7 @@ export class Chat extends BaseEntity {
     return isAnonymous;
   }
 
-  isAllowedToDelete(userId: number, userRoleType: RoleType): boolean {
-    return this.author.id === userId || userRoleType === RoleType.ADMIN;
+  isAuthor(userId: number): boolean {
+    return this.author.id === userId;
   }
 }

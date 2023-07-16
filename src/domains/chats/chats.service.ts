@@ -1,13 +1,19 @@
+import { UserRepository } from 'src/domains/users/repositories/user.repository';
 import { PostsService } from './../posts/posts.service';
 import { UsersService } from './../users/users.service';
 import { PostRepository } from './../posts/repositories/post.repository';
 import { ChatRepository } from './repositories/chat.repository';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateChatDto } from './dtos/create-chat.dto';
 import { UpdateChatDto } from './dtos/update-chat.dto';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Chat } from './entities/chat.entity';
+import { RoleType } from '../spaces/constants/constants';
 
 @Injectable()
 export class ChatsService {
@@ -15,7 +21,14 @@ export class ChatsService {
     private readonly chatRepository: ChatRepository,
     private readonly postRepository: PostRepository,
     private readonly usersService: UsersService,
+    private readonly userRepository: UserRepository,
   ) {}
+  /**
+   * 댓글 작성
+   * @param dto CreateChatDto
+   * @param userId
+   * @returns chatId
+   */
   async create(dto: CreateChatDto, userId: number) {
     const user = await this.usersService.validateUser(userId);
 
@@ -59,8 +72,44 @@ export class ChatsService {
     return `This action updates a #${id} chat`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+  /**
+   * 댓글 삭제 (관리자, 작성자만)
+   * @param chatId
+   * @param userId
+   */
+  async deleteChat(chatId: number, userId: number) {
+    const user = await this.usersService.validateUser(userId);
+
+    const chat = await this.chatRepository.findOne({
+      where: {
+        id: chatId,
+      },
+    });
+    if (!chat) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_CHAT);
+    }
+
+    const postId = chat.post.id;
+    const space = await this.postRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
+    const userSpaceRole =
+      await this.userRepository.getSpaceRoleBySpaceIdAndUserId(
+        userId,
+        space.id,
+      );
+
+    if (
+      !userSpaceRole.hasRoleInSpace(space.id, RoleType.ADMIN) &&
+      !chat.isAuthor(userId)
+    ) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+
+    await this.chatRepository.softDelete(chatId);
   }
 
   private async validatePost(postId: number, userId: number) {
