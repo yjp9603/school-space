@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   Res,
-  UseGuards,
   Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
@@ -16,9 +15,7 @@ import { UpdatePostDto } from './dtos/update-post.dto';
 import AuthUser from 'src/common/decorators/auth-user.decorator';
 import { Response } from 'express';
 import { User } from '../users/entities/user.entity';
-import { AuthGuard } from '@nestjs/passport';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
-import { PageRequest } from 'src/common/page';
 import { PostPageRequest } from './dtos/post.pagination';
 
 @Controller('/posts')

@@ -1,10 +1,9 @@
 import { User } from './../../users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import BaseEntity from 'src/common/entity/base.entity';
 import { Space } from 'src/domains/spaces/entities/space.entity';
 import { PostType } from '../constants/constants';
 import { RoleType } from 'src/domains/spaces/constants/constants';
-import { Chat } from 'src/domains/chats/entities/chat.entity';
 @Entity()
 export class Post extends BaseEntity {
   @Column({

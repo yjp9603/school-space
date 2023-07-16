@@ -16,7 +16,6 @@ import { RoleType } from './constants/constants';
 import { Page, PageRequest } from 'src/common/page';
 import { SpaceListDto } from './dtos/space-list.dto';
 import { UpdateSpaceRoleTypeDto } from './dtos/update-space-role-type.dto';
-import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class SpacesService {

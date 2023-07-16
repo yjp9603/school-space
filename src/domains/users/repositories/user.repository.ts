@@ -57,4 +57,12 @@ export class UserRepository extends Repository<User> {
 
     return !!user;
   }
+
+  // async findUserWithRolesById(userId: number) {
+  //   return this.createQueryBuilder('user')
+  //     .where('user.id = :userId', { userId })
+  //     .leftJoinAndSelect('user.spaceRole', 'roles') // adjust based on your roles structure
+  //     .leftJoinAndSelect('user.name', 'name') // include the name relation
+  //     .getOne();
+  // }
 }

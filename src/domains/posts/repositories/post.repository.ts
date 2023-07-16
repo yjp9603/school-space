@@ -1,6 +1,5 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
-import { PageRequest } from 'src/common/page';
 import { PostPageRequest } from '../dtos/post.pagination';
 
 @EntityRepository(Post)
