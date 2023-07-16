@@ -22,4 +22,15 @@ export class PostRepository extends Repository<Post> {
       .where('post.id = :postId', { postId })
       .getOne();
   }
+
+  async findSpaceRoleByPostIdAndUserId(postId: number, userId: number) {
+    return await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.space', 'space')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.user', 'user')
+      .leftJoinAndSelect('spaceUser.spaceRole', 'spaceRole')
+      .where('post.id = :postId', { postId })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
+  }
 }

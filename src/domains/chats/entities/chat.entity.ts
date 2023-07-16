@@ -1,4 +1,6 @@
+import { ForbiddenException } from '@nestjs/common';
 import BaseEntity from 'src/common/entity/base.entity';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Post } from 'src/domains/posts/entities/post.entity';
 import { RoleType } from 'src/domains/spaces/constants/constants';
 import { User } from 'src/domains/users/entities/user.entity';
@@ -17,6 +19,12 @@ export class Chat extends BaseEntity {
   })
   isAnonymous: boolean;
 
+  @Column({
+    comment: '부모 댓글 아이디, 댓글은 자신 아이디',
+    nullable: true,
+  })
+  parentId: number;
+
   @ManyToOne(() => Post, { onDelete: 'CASCADE' })
   post: Post;
 
@@ -24,33 +32,40 @@ export class Chat extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   author: User;
 
-  @JoinColumn({ name: 'parent_id' })
-  @ManyToOne(() => Chat)
-  private parent: Chat;
-
-  @OneToMany(() => Chat, (child) => child.parent)
-  private child: Chat[];
-
   static from({
     content,
     isAnonymous,
     post,
     user,
-    parent,
+    parentId,
+    roleType,
   }: {
     content: string;
     isAnonymous: boolean;
     post: Post;
     user: User;
-    parent: Chat;
+    parentId: number;
+    roleType: RoleType;
   }) {
     const chat = new Chat();
     chat.content = content;
-    chat.isAnonymous = isAnonymous;
+    chat.isAnonymous = chat.setAnonymous(isAnonymous, roleType);
     chat.post = post;
     chat.author = user;
-    chat.parent = parent || null;
+    if (!parentId) {
+      parentId = null;
+    }
+    chat.parentId = parentId;
+
     return chat;
+  }
+
+  private setAnonymous(isAnonymous: boolean, roleType: RoleType): boolean {
+    if (isAnonymous && roleType === RoleType.ADMIN) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN_ANONYMOUS);
+    }
+
+    return isAnonymous;
   }
 
   isAllowedToDelete(userId: number, userRoleType: RoleType): boolean {

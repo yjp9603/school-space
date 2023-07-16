@@ -6,18 +6,29 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dtos/create-chat.dto';
 import { UpdateChatDto } from './dtos/update-chat.dto';
+import AuthUser from 'src/common/decorators/auth-user.decorator';
+import { User } from '../users/entities/user.entity';
+import { Response } from 'express';
+import UseAuthGuards from '../auth/auth-guards/user-auth';
 
 @Controller('chats')
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
   @Post()
-  create(@Body() createChatDto: CreateChatDto) {
-    return this.chatsService.create(createChatDto);
+  @UseAuthGuards()
+  async create(
+    @Res() res: Response,
+    @Body() createChatDto: CreateChatDto,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.chatsService.create(createChatDto, user.id);
+    return res.status(201).json(result);
   }
 
   @Get()
