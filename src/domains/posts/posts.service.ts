@@ -25,7 +25,6 @@ export class PostsService {
     private readonly userRepository: UserRepository,
     private readonly postRepository: PostRepository,
     private readonly spaceRepository: SpaceRepository,
-    private readonly spaceUserRepository: SpaceUserRepository,
     private readonly connection: Connection,
   ) {}
   /**
@@ -36,50 +35,38 @@ export class PostsService {
    */
   async createPost(dto: CreatePostDto, userId: number) {
     await this.connection.transaction(async () => {
-      const user = await this.userRepository.findByUserId(userId);
-      if (!user) {
+      const currentUser = await this.userRepository.findByUserId(userId);
+      if (!currentUser) {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
       }
 
-      const space = await this.spaceRepository.findSpaceRoleByspaceId(
+      const targetSpace = await this.spaceRepository.findSpaceRoleBySpaceId(
         dto.spaceId,
         userId,
       );
-      if (!space) {
+      if (!targetSpace) {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
       }
-      if (!space.spaceUsers || space.spaceUsers.length === 0) {
-        throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
-      }
-      console.log('space::', space);
-
-      // refactor
-      const type = space.spaceUsers[0].spaceRole.type;
-      console.log('type::', type);
-
-      // 2. 공지사항을 작성할 수 있는 어드민 유저인지 권한체크
-      if (type !== RoleType.ADMIN && dto.type === PostType.NOTICE) {
+      if (!targetSpace.spaceUsers || targetSpace.spaceUsers.length === 0) {
         throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
       }
 
-      // 3. 익명 유저로 작성할 수 있는 참여자인지 체크
-      if (type !== RoleType.PARTICIPANT && dto.isAnonymous === true) {
-        throw new ForbiddenException(HttpErrorConstants.FORBIDDEN_ANONYMOUS);
-      }
+      const userRoleType = targetSpace.spaceUsers[0].spaceRole.type;
 
-      //4. Post 생성
       const post = Post.from({
         content: dto.content,
         type: dto.type,
         isAnonymous: dto.isAnonymous,
-        user: user,
-        space: space,
+        user: currentUser,
+        space: targetSpace,
+        userRoleType,
       });
 
-      //5.저장
-      await this.postRepository.save(post);
+      const result = await this.postRepository.save(post);
 
-      return { postId: post.id };
+      return {
+        postId: result.id,
+      };
     });
   }
 

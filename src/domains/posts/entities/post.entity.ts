@@ -1,9 +1,11 @@
+import { RoleType } from './../../spaces/constants/constants';
 import { User } from './../../users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import BaseEntity from 'src/common/entity/base.entity';
 import { Space } from 'src/domains/spaces/entities/space.entity';
 import { PostType } from '../constants/constants';
-import { RoleType } from 'src/domains/spaces/constants/constants';
+import { ForbiddenException } from '@nestjs/common';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 @Entity()
 export class Post extends BaseEntity {
   @Column({
@@ -23,11 +25,11 @@ export class Post extends BaseEntity {
   })
   isAnonymous: boolean;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' }) // 유저 - 포스트는 1:N 관계이므로 N쪽에 적용. 유저 삭제시 게시글 삭제
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   author: User;
 
-  @ManyToOne(() => Space) // 스페이스 - 포스트는 1:N 관계이므로 N쪽에 적용. 공간 하나에 여러개의 게시글
+  @ManyToOne(() => Space)
   @JoinColumn({ name: 'space_id' })
   space: Space;
 
@@ -37,14 +39,26 @@ export class Post extends BaseEntity {
     type,
     user,
     space,
+    userRoleType,
   }: {
     content: string;
     isAnonymous: boolean;
     type: PostType;
     user: User;
     space: Space;
+    userRoleType: RoleType;
   }) {
     const post = new Post();
+
+    // 2. 공지사항을 작성할 수 있는 어드민 유저인지
+    if (userRoleType !== RoleType.ADMIN && type === PostType.NOTICE) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+
+    // 3. 익명 유저로 작성할 수 있는 참여자인지
+    if (userRoleType !== RoleType.PARTICIPANT && isAnonymous === true) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN_ANONYMOUS);
+    }
 
     post.content = content;
     post.isAnonymous = isAnonymous;
@@ -53,11 +67,5 @@ export class Post extends BaseEntity {
     post.space = space;
 
     return post;
-  }
-
-  canDeletePost(currentUserId: number, currentUserRoleType: RoleType): boolean {
-    return (
-      currentUserRoleType === RoleType.ADMIN || currentUserId === this.author.id
-    );
   }
 }
