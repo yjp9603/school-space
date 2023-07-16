@@ -7,6 +7,7 @@ import { RoleType } from '../constants/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { Post } from 'src/domains/posts/entities/post.entity';
 @Entity()
 export class Space extends BaseEntity {
   @Column({
@@ -31,6 +32,9 @@ export class Space extends BaseEntity {
 
   @OneToMany(() => SpaceUser, (spaceUser) => spaceUser.space, { cascade: true }) // Space 추가되면 SpaceUser도 추가
   spaceUsers: SpaceUser[];
+
+  // @OneToMany(() => Post, (post) => post.space)
+  // posts: Post[];
 
   static from({
     spaceName,

@@ -10,7 +10,8 @@ export class SpaceRepository extends Repository<Space> {
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.user', 'user')
       .where('user.id = :userId', { userId })
-      .take(pageRequest.offset)
+      .orderBy('space.id', pageRequest.order)
+      .take(pageRequest.limit)
       .skip(pageRequest.offset)
       .getManyAndCount();
   }
@@ -63,5 +64,12 @@ export class SpaceRepository extends Repository<Space> {
       .from(SpaceRole)
       .where('id = :roleId', { roleId })
       .execute();
+  }
+
+  async findSpaceWithUsersById(spaceId: number) {
+    return await this.createQueryBuilder('space')
+      .innerJoinAndSelect('space.spaceUsers', 'spaceUsers')
+      .where('space.id = :spaceId', { spaceId })
+      .getOne();
   }
 }

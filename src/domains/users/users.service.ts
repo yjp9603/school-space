@@ -2,22 +2,23 @@ import { User } from 'src/domains/users/entities/user.entity';
 import {
   ConflictException,
   ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
-import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { Connection } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private readonly connection: Connection,
+  ) {}
   /**
    * 유저 회원가입
    * @param dto CreateUserDto
@@ -28,7 +29,6 @@ export class UsersService {
     if (existEmail) {
       throw new ConflictException(HttpErrorConstants.EXIST_EMAIL);
     }
-
     const user = await User.from(dto);
 
     await this.userRepository.save(user);
@@ -70,7 +70,7 @@ export class UsersService {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }
 
-    await user.update(dto);
+    user.update(dto);
     await this.userRepository.save(user);
     return user;
   }

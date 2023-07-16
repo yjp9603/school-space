@@ -35,4 +35,26 @@ export class UserRepository extends Repository<User> {
       .andWhere('space.id = :spaceId', { spaceId })
       .getOne();
   }
+
+  async checkJoinSpaceByUserId(userId: number) {
+    return await this.createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.spaceUsers',
+        'spaceUser',
+        'spaceUser.user_id = :userId',
+        { userId },
+      )
+      .getMany();
+  }
+
+  async isUserPartOfSpace(userId: number, spaceId: number): Promise<boolean> {
+    const user = await this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.space', 'space')
+      .where('user.id = :userId', { userId })
+      .andWhere('space.id = :spaceId', { spaceId })
+      .getOne();
+
+    return !!user;
+  }
 }

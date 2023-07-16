@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dtos/create-post.dto';
@@ -17,6 +18,8 @@ import { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
+import { PageRequest } from 'src/common/page';
+import { PostPageRequest } from './dtos/post.pagination';
 
 @Controller('/posts')
 export class PostsController {
@@ -34,8 +37,14 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @UseAuthGuards()
+  async findAllPosts(
+    @Res() res: Response,
+    @Query() pageRequest: PostPageRequest,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.postsService.findAllPosts(user.id, pageRequest);
+    return res.status(200).json(result);
   }
 
   @Get(':id')
