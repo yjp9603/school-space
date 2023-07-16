@@ -1,5 +1,8 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { RoleType } from 'src/domains/spaces/constants/constants';
+import { NotFoundException } from '@nestjs/common';
+import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -51,12 +54,4 @@ export class UserRepository extends Repository<User> {
 
     return !!user;
   }
-
-  // async findUserWithRolesById(userId: number) {
-  //   return this.createQueryBuilder('user')
-  //     .where('user.id = :userId', { userId })
-  //     .leftJoinAndSelect('user.spaceRole', 'roles') // adjust based on your roles structure
-  //     .leftJoinAndSelect('user.name', 'name') // include the name relation
-  //     .getOne();
-  // }
 }
