@@ -44,6 +44,20 @@ export class PostsController {
     return res.status(200).json(result);
   }
 
+  @Get('/:postId')
+  @UseAuthGuards()
+  async findPostWithComment(
+    @Res() res: Response,
+    @Param('postId') postId: number,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.postsService.findPostWithComment(
+      +postId,
+      user.id,
+    );
+    return res.status(200).json(result);
+  }
+
   @Delete('/:postId')
   @UseAuthGuards()
   async deletPost(

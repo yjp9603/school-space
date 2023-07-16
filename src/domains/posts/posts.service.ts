@@ -101,15 +101,26 @@ export class PostsService {
     return new Page<PostListDto>(totalCount, items, pageRequest);
   }
 
+  async findPostWithComment(userId: number, postId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['comments'],
+    });
+    if (!post) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
+    }
+
+    return post;
+  }
+
   /**
    * 게시글 삭제 (관리자, 작성자만)
-   * @param id
-   * @returns
+   * @param postId
+   * @param spaceId
+   * @param userId
    */
   async deletPost(postId: number, spaceId: number, userId: number) {
-    console.log('postId::', typeof postId);
-    console.log('spaceId::', typeof spaceId);
-    const user = await this.userRepository.findOne(userId);
+    const user = await this.userRepository.findByUserId(userId);
     if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
     }
@@ -120,7 +131,6 @@ export class PostsService {
     if (!post || post.space.id !== spaceId) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
     }
-    console.log('post::', post);
 
     const userSpaceRole =
       await this.userRepository.getSpaceRoleBySpaceIdAndUserId(userId, spaceId);
@@ -134,27 +144,4 @@ export class PostsService {
 
     await this.postRepository.softDelete(postId);
   }
-  //   const post = await this.postRepository.findOne({
-  //     where: { id: postId },
-  //     relations: ['author', 'space'],
-  //   });
-  //   if (!post && post.space.id !== spaceId) {
-  //     throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
-  //   }
-
-  //   const role = await this.userRepository.getSpaceRoleBySpaceIdAndUserId(
-  //     userId,
-  //     post.space.id,
-  //   );
-  //   console.log('role::', role);
-
-  //   if (
-  //     role.spaceUsers[0].spaceRole.type !== RoleType.ADMIN &&
-  //     post.author.id !== userId
-  //   ) {
-  //     throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
-  //   }
-
-  //   await this.postRepository.softDelete(postId);
-  // }
 }

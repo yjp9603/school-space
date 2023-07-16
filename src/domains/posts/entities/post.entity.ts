@@ -83,12 +83,6 @@ export class Post extends BaseEntity {
     return false;
   }
 
-  async checkDeletePost(userId: number, spaceRole: SpaceRole) {
-    if (this.author.id !== userId && spaceRole.type !== RoleType.ADMIN) {
-      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
-    }
-  }
-
   isAuthor(userId: number): boolean {
     return this.author.id === userId;
   }
