@@ -42,10 +42,11 @@ export class PostsService {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
       }
 
-      const targetSpace = await this.spaceRepository.findSpaceRoleBySpaceId(
-        dto.spaceId,
-        userId,
-      );
+      const targetSpace =
+        await this.spaceRepository.getSpaceRoleBySpaceIdAndUserId(
+          dto.spaceId,
+          userId,
+        );
       if (!targetSpace) {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
       }
@@ -100,45 +101,60 @@ export class PostsService {
     return new Page<PostListDto>(totalCount, items, pageRequest);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
-  }
-
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
-  }
-
   /**
    * 게시글 삭제 (관리자, 작성자만)
    * @param id
    * @returns
    */
   async deletPost(postId: number, spaceId: number, userId: number) {
-    // 1. 게시글 조회
-    // 2. 관리자 or 작성자 인지 체크
-    // 3. soft delete
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-      relations: ['author', 'space'],
-    });
-    if (!post && post.space.id !== spaceId) {
+    console.log('postId::', typeof postId);
+    console.log('spaceId::', typeof spaceId);
+    const user = await this.userRepository.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    const post = await this.postRepository.findPostAuthorAndSpaceByPostId(
+      postId,
+    );
+    if (!post || post.space.id !== spaceId) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
     }
     console.log('post::', post);
 
-    console.log('post.space.id::', post.space.id);
-    const role = await this.userRepository.findSpaceRoleBySpaceId(
-      userId,
-      post.space.id,
-    );
-    console.log('role::', role);
+    const userSpaceRole =
+      await this.userRepository.getSpaceRoleBySpaceIdAndUserId(userId, spaceId);
+
     if (
-      role.spaceUsers[0].spaceRole.type !== RoleType.ADMIN &&
-      post.author.id !== userId
+      !userSpaceRole.hasRoleInSpace(spaceId, RoleType.ADMIN) &&
+      !post.isAuthor(userId)
     ) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }
 
     await this.postRepository.softDelete(postId);
   }
+  //   const post = await this.postRepository.findOne({
+  //     where: { id: postId },
+  //     relations: ['author', 'space'],
+  //   });
+  //   if (!post && post.space.id !== spaceId) {
+  //     throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
+  //   }
+
+  //   const role = await this.userRepository.getSpaceRoleBySpaceIdAndUserId(
+  //     userId,
+  //     post.space.id,
+  //   );
+  //   console.log('role::', role);
+
+  //   if (
+  //     role.spaceUsers[0].spaceRole.type !== RoleType.ADMIN &&
+  //     post.author.id !== userId
+  //   ) {
+  //     throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+  //   }
+
+  //   await this.postRepository.softDelete(postId);
+  // }
 }

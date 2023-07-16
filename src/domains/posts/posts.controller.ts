@@ -44,16 +44,6 @@ export class PostsController {
     return res.status(200).json(result);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
-  }
-
   @Delete('/:postId')
   @UseAuthGuards()
   async deletPost(
@@ -62,7 +52,11 @@ export class PostsController {
     @Query('spaceId') spaceId: number,
     @AuthUser() user: User,
   ) {
-    const result = await this.postsService.deletPost(postId, spaceId, user.id);
+    const result = await this.postsService.deletPost(
+      +postId,
+      +spaceId,
+      user.id,
+    );
     return res.status(200).json(result);
   }
 }

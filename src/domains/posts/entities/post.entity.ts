@@ -8,6 +8,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { PostListDto } from '../dtos/post-list.dto';
 import { Name } from 'src/domains/users/entities/name.entity';
+import { SpaceRole } from 'src/domains/spaces/entities/space-role.entity';
 @Entity()
 export class Post extends BaseEntity {
   @Column({
@@ -80,5 +81,15 @@ export class Post extends BaseEntity {
       return true;
     }
     return false;
+  }
+
+  async checkDeletePost(userId: number, spaceRole: SpaceRole) {
+    if (this.author.id !== userId && spaceRole.type !== RoleType.ADMIN) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+  }
+
+  isAuthor(userId: number): boolean {
+    return this.author.id === userId;
   }
 }

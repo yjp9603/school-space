@@ -16,15 +16,11 @@ export class SpaceRepository extends Repository<Space> {
       .getManyAndCount();
   }
 
-  async findByUserId(userId: number) {
-    return await this.createQueryBuilder('space')
-      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
-      .leftJoinAndSelect('spaceUser.user', 'user')
-      .where('user.id = :userId', { userId })
-      .getMany();
-  }
-
-  async findOwnerBySpaceIdAndUserId(spaceId: number, userId: number) {
+  // space - spaceUser - user with spaceId and userId
+  async findOwnerBySpaceIdAndUserId(
+    spaceId: number,
+    userId: number,
+  ): Promise<Space> {
     return await this.createQueryBuilder('space')
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.user', 'user')
@@ -33,7 +29,7 @@ export class SpaceRepository extends Repository<Space> {
       .getOne();
   }
 
-  async findSpaceByJoinCode(joinCode: string, userId: number) {
+  async findSpaceByJoinCode(joinCode: string, userId: number): Promise<Space> {
     return await this.createQueryBuilder('space')
       .leftJoinAndSelect(
         'space.spaceUsers',
@@ -49,16 +45,17 @@ export class SpaceRepository extends Repository<Space> {
       .getOne();
   }
 
-  async getUsersSpaceRoleBySpaceId(spaceId: number) {
+  // space - spaceRoles - spaceUsers - user with spaceId
+  async getUsersSpaceRoleBySpaceId(spaceId: number): Promise<Space> {
     return await this.createQueryBuilder('space')
-      .leftJoinAndSelect('space.spaceRoles', 'spaceRoles')
-      .leftJoinAndSelect('space.spaceUsers', 'spaceUsers')
-      .leftJoinAndSelect('spaceUsers.user', 'user')
+      .leftJoinAndSelect('space.spaceRoles', 'spaceRole')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.user', 'user')
       .where('space.id = :spaceId', { spaceId })
       .getOne();
   }
 
-  async deleteRole(roleId: number) {
+  async deleteRole(roleId: number): Promise<any> {
     return await this.createQueryBuilder()
       .softDelete()
       .from(SpaceRole)
@@ -66,14 +63,11 @@ export class SpaceRepository extends Repository<Space> {
       .execute();
   }
 
-  async findSpaceWithUsersById(spaceId: number) {
-    return await this.createQueryBuilder('space')
-      .innerJoinAndSelect('space.spaceUsers', 'spaceUsers')
-      .where('space.id = :spaceId', { spaceId })
-      .getOne();
-  }
-
-  async findSpaceRoleBySpaceId(spaceId: number, userId: number) {
+  // space - spaceUser - spaceRole with spaceId and userId
+  async getSpaceRoleBySpaceIdAndUserId(
+    spaceId: number,
+    userId: number,
+  ): Promise<Space> {
     return await this.createQueryBuilder('space')
       .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.spaceRole', 'spaceRole')

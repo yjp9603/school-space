@@ -99,10 +99,8 @@ export class UsersService {
    * @returns spaceUser
    */
   async getUserSpaceRole(userId: number, spaceId: number): Promise<SpaceUser> {
-    const userSpaceRole = await this.userRepository.findSpaceRoleBySpaceId(
-      userId,
-      spaceId,
-    );
+    const userSpaceRole =
+      await this.userRepository.getSpaceRoleBySpaceIdAndUserId(userId, spaceId);
     if (!userSpaceRole) {
       throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
     }

@@ -14,4 +14,12 @@ export class PostRepository extends Repository<Post> {
       .skip(pageRequest.offset)
       .getManyAndCount();
   }
+
+  async findPostAuthorAndSpaceByPostId(postId: number) {
+    return await this.createQueryBuilder('post')
+      .innerJoinAndSelect('post.space', 'space')
+      .innerJoinAndSelect('post.author', 'user')
+      .where('post.id = :postId', { postId })
+      .getOne();
+  }
 }

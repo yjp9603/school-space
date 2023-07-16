@@ -26,7 +26,11 @@ export class UserRepository extends Repository<User> {
     await this.update({ id: userId }, { password: newPassword });
   }
 
-  async findSpaceRoleBySpaceId(userId: number, spaceId: number) {
+  // 유저가 현재 스페이스에서의 권한을 가져옴 User-userSpace-Space-SpaceRole
+  async getSpaceRoleBySpaceIdAndUserId(
+    userId: number,
+    spaceId: number,
+  ): Promise<User> {
     return await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.space', 'space')
@@ -36,17 +40,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async checkJoinSpaceByUserId(userId: number) {
-    return await this.createQueryBuilder('user')
-      .innerJoinAndSelect(
-        'user.spaceUsers',
-        'spaceUser',
-        'spaceUser.user_id = :userId',
-        { userId },
-      )
-      .getMany();
-  }
-
+  // 유저가 해당 스페이스에 속해있는지 확인
   async checkUserofSpace(userId: number, spaceId: number): Promise<boolean> {
     const user = await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.spaceUsers', 'spaceUser')

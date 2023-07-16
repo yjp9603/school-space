@@ -7,6 +7,7 @@ import { UpdateUserDto } from '../dtos/update-user.dto';
 import { Name } from './name.entity';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { SpaceUser } from 'src/domains/spaces/entities/space-user.entity';
+import { RoleType } from 'src/domains/spaces/constants/constants';
 
 @Entity()
 export class User extends BaseEntity {
@@ -86,5 +87,17 @@ export class User extends BaseEntity {
     if (!equalPassword) {
       throw new UnauthorizedException(HttpErrorConstants.INVALID_AUTH);
     }
+  }
+
+  hasRoleInSpace(spaceId: number, roleType: RoleType): boolean {
+    const spaceUser = this.spaceUsers.find(
+      (spaceUser) => spaceUser.space.id === spaceId,
+    );
+
+    if (!spaceUser) {
+      return false;
+    }
+
+    return spaceUser && spaceUser.spaceRole.type === roleType;
   }
 }
