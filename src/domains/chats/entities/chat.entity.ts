@@ -52,9 +52,6 @@ export class Chat extends BaseEntity {
     chat.isAnonymous = chat.setAnonymous(isAnonymous, roleType);
     chat.post = post;
     chat.author = user;
-    if (!parentId) {
-      parentId = null;
-    }
     chat.parentId = parentId;
 
     return chat;

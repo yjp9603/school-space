@@ -1,71 +1,48 @@
+import { PostsService } from './../posts/posts.service';
+import { UsersService } from './../users/users.service';
 import { PostRepository } from './../posts/repositories/post.repository';
 import { ChatRepository } from './repositories/chat.repository';
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChatDto } from './dtos/create-chat.dto';
 import { UpdateChatDto } from './dtos/update-chat.dto';
-import { UsersService } from '../users/users.service';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Chat } from './entities/chat.entity';
-import { RoleType } from '../spaces/constants/constants';
 
 @Injectable()
 export class ChatsService {
   constructor(
     private readonly chatRepository: ChatRepository,
     private readonly postRepository: PostRepository,
-    private readonly userRepository: UserRepository,
+    private readonly usersService: UsersService,
   ) {}
   async create(dto: CreateChatDto, userId: number) {
-    const user = await this.userRepository.findByUserId(userId);
-    if (!user) {
-      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
-    }
+    const user = await this.usersService.validateUser(userId);
 
-    const post = await this.postRepository.findSpaceRoleByPostIdAndUserId(
-      dto.postId,
-      userId,
-    );
-    if (!post) {
-      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
-    }
-    console.log('post::', post);
+    const post = await this.validatePost(dto.postId, userId);
+
+    const parentId = await this.validateParentChat(dto.parentId);
 
     const roleType = post.space.spaceUsers[0].spaceRole.type;
-    console.log('roleType::', roleType);
 
-    let parentId;
-
-    if (dto.parentId) {
-      await this.chatRepository.findOne({
-        where: {
-          id: dto.parentId,
-        },
-      });
-      if (!parentId) {
-        throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_CHAT);
-      }
-    }
-
-    const chat = Chat.from({
+    let chat;
+    chat = Chat.from({
       content: dto.content,
       isAnonymous: dto.isAnonymous,
       post,
       user,
-      parentId: dto.parentId,
+      parentId,
       roleType: roleType,
     });
 
-    await this.chatRepository.save(chat);
-
+    // docs: 댓글은 자기 자신을 parentId로 가지는데, 트랜잭션을 최소화하기 위해 insert 사용
     if (!dto.parentId) {
-      chat.parentId = chat.id;
-      await this.chatRepository.update(chat.id, { parentId: chat.id });
+      const insertResult = await this.chatRepository.insert(chat);
+      const generatedId = insertResult.identifiers[0].id;
+      chat = { ...chat, id: generatedId, parentId: generatedId };
     }
+
+    await this.chatRepository.save(chat);
 
     return chat.id;
   }
@@ -84,5 +61,31 @@ export class ChatsService {
 
   remove(id: number) {
     return `This action removes a #${id} chat`;
+  }
+
+  private async validatePost(postId: number, userId: number) {
+    const post = await this.postRepository.findSpaceRoleByPostIdAndUserId(
+      postId,
+      userId,
+    );
+    if (!post) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
+    }
+    return post;
+  }
+
+  private async validateParentChat(parentId: number) {
+    if (parentId) {
+      const parentChat = await this.chatRepository.findOne({
+        where: {
+          id: parentId,
+        },
+      });
+      if (!parentChat) {
+        throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_CHAT);
+      }
+      return parentId;
+    }
+    return null;
   }
 }

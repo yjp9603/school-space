@@ -111,4 +111,12 @@ export class UsersService {
 
     return spaceUser;
   }
+
+  public async validateUser(userId: number) {
+    const user = await this.userRepository.findByUserId(userId);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+    return user;
+  }
 }
