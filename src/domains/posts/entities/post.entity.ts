@@ -6,6 +6,8 @@ import { Space } from 'src/domains/spaces/entities/space.entity';
 import { PostType } from '../constants/constants';
 import { ForbiddenException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
+import { PostListDto } from '../dtos/post-list.dto';
+import { Name } from 'src/domains/users/entities/name.entity';
 @Entity()
 export class Post extends BaseEntity {
   @Column({
@@ -67,5 +69,16 @@ export class Post extends BaseEntity {
     post.space = space;
 
     return post;
+  }
+
+  requiredAnonymousUserName(userId: number, userRoleType: RoleType) {
+    if (
+      this.isAnonymous &&
+      userId !== this.author.id &&
+      userRoleType !== RoleType.ADMIN
+    ) {
+      return true;
+    }
+    return false;
   }
 }

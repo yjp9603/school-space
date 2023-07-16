@@ -164,7 +164,7 @@ export class SpacesService {
     dto: UpdateSpaceRoleTypeDto,
     userid: number,
   ) {
-    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+    const space = await this.spaceRepository.getUsersSpaceRoleBySpaceId(
       spaceId,
     );
     if (!space) {
@@ -187,7 +187,7 @@ export class SpacesService {
    * 소유자 변경 (소유자만)
    */
   async changeOwner(spaceId: number, newOwnerId: number): Promise<Space> {
-    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+    const space = await this.spaceRepository.getUsersSpaceRoleBySpaceId(
       spaceId,
     );
 
@@ -210,7 +210,7 @@ export class SpacesService {
     requestRoleId: number,
     requestUserId: number,
   ) {
-    const space = await this.spaceRepository.findSpaceWithRolesAndUsersById(
+    const space = await this.spaceRepository.getUsersSpaceRoleBySpaceId(
       spaceId,
     );
     if (!space) {

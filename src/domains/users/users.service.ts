@@ -12,6 +12,7 @@ import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Connection } from 'typeorm';
+import { SpaceUser } from '../spaces/entities/space-user.entity';
 
 @Injectable()
 export class UsersService {
@@ -89,5 +90,27 @@ export class UsersService {
     await user.validatePassword(dto.currentPassword, user.password);
     const newPassword = await user.hashPassword(dto.newPassword);
     await this.userRepository.updatePasswordByUserId(user.id, newPassword);
+  }
+
+  /**
+   * 유저ID, 스페이스ID로 유저의 스페이스 권한 조회
+   * @param userId
+   * @param spaceId
+   * @returns spaceUser
+   */
+  async getUserSpaceRole(userId: number, spaceId: number): Promise<SpaceUser> {
+    const userSpaceRole = await this.userRepository.findSpaceRoleBySpaceId(
+      userId,
+      spaceId,
+    );
+    if (!userSpaceRole) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+
+    const spaceUser = userSpaceRole.spaceUsers.find(
+      (su) => su.space.id === spaceId,
+    );
+
+    return spaceUser;
   }
 }

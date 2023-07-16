@@ -47,7 +47,7 @@ export class UserRepository extends Repository<User> {
       .getMany();
   }
 
-  async isUserPartOfSpace(userId: number, spaceId: number): Promise<boolean> {
+  async checkUserofSpace(userId: number, spaceId: number): Promise<boolean> {
     const user = await this.createQueryBuilder('user')
       .leftJoinAndSelect('user.spaceUsers', 'spaceUser')
       .leftJoinAndSelect('spaceUser.space', 'space')

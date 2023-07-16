@@ -18,6 +18,7 @@ import { Connection } from 'typeorm';
 import { PostPageRequest } from './dtos/post.pagination';
 import { PostListDto } from './dtos/post-list.dto';
 import { Name } from '../users/entities/name.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PostsService {
@@ -26,6 +27,7 @@ export class PostsService {
     private readonly postRepository: PostRepository,
     private readonly spaceRepository: SpaceRepository,
     private readonly connection: Connection,
+    private readonly usersService: UsersService,
   ) {}
   /**
    * 참여중인 스페이스의 게시글 작성
@@ -35,8 +37,8 @@ export class PostsService {
    */
   async createPost(dto: CreatePostDto, userId: number) {
     await this.connection.transaction(async () => {
-      const currentUser = await this.userRepository.findByUserId(userId);
-      if (!currentUser) {
+      const user = await this.userRepository.findByUserId(userId);
+      if (!user) {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
       }
 
@@ -57,7 +59,7 @@ export class PostsService {
         content: dto.content,
         type: dto.type,
         isAnonymous: dto.isAnonymous,
-        user: currentUser,
+        user: user,
         space: targetSpace,
         userRoleType,
       });
@@ -78,41 +80,21 @@ export class PostsService {
    */
   async findAllPosts(userId: number, pageRequest: PostPageRequest) {
     const spaceId = +pageRequest.spaceId;
-    // 1. 해당 유저가 요청한 spaceId의 스페이스에 속해있는지 체크
-    const user = await this.userRepository.isUserPartOfSpace(userId, spaceId);
+
+    const user = await this.userRepository.checkUserofSpace(userId, spaceId);
     if (!user) {
       throw new ForbiddenException(HttpErrorConstants.CANNOT_FIND_USER);
     }
 
-    // 유저의 권한 확인 (관리자 or 참가자)
-    const userSpaceRole = await this.userRepository.findSpaceRoleBySpaceId(
-      userId,
-      spaceId,
-    );
-    if (!userSpaceRole) {
-      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
-    }
+    const spaceUser = await this.usersService.getUserSpaceRole(userId, spaceId);
 
-    const spaceUser = userSpaceRole.spaceUsers.find(
-      (su) => su.space.id === spaceId,
-    );
+    const roleType = spaceUser.spaceRole.type;
 
-    // 2. 해당 space의 모든 게시글 조회
     const [postList, totalCount] =
       await this.postRepository.findAndCountBySpaceId(pageRequest, spaceId);
 
-    // 익명으로 작성한 경우, name을 '익명'으로 변경
-    // 관리자와 본인은 정상 조회.
     const items = postList.map((post) => {
-      if (
-        post.isAnonymous && //익명인데
-        userId !== post.author.id && // 본인이 아니고
-        spaceUser.spaceRole.type !== RoleType.ADMIN //관리자가 아니면
-      ) {
-        post.author.name.firstName = '익명';
-        post.author.name.lastName = '참여자';
-      }
-      return new PostListDto(post);
+      return new PostListDto(post, userId, roleType);
     });
 
     return new Page<PostListDto>(totalCount, items, pageRequest);
