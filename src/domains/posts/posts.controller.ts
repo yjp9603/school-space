@@ -54,8 +54,15 @@ export class PostsController {
     return this.postsService.update(+id, updatePostDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+  @Delete('/:postId')
+  @UseAuthGuards()
+  async deletPost(
+    @Res() res: Response,
+    @Param('postId') postId: number,
+    @Query('spaceId') spaceId: number,
+    @AuthUser() user: User,
+  ) {
+    const result = await this.postsService.deletPost(postId, spaceId, user.id);
+    return res.status(200).json(result);
   }
 }

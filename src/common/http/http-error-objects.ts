@@ -54,8 +54,8 @@ export const HttpErrorConstants = {
     message: '리프레시 토큰이 만료되었습니다. 다시 로그인이 필요합니다.',
   },
 
-  CANNOT_FIND_BOARD: {
-    errorCode: 'CANNOT_FIND_BOARD',
+  CANNOT_FIND_POST: {
+    errorCode: 'CANNOT_FIND_POST',
     message: '게시글을 찾을 수 없습니다.',
   } as HttpErrorFormat,
 

@@ -36,33 +36,34 @@ export class PostsService {
    */
   async createPost(dto: CreatePostDto, userId: number) {
     await this.connection.transaction(async () => {
-      // 1. 유저가 어떤 스페이스 참여중이고, 어떤 권한을 가지고 있는지 확인
-      const userSpaceRole = await this.userRepository.findSpaceRoleBySpaceId(
-        userId,
-        dto.spaceId,
-      );
-      if (!userSpaceRole || !userSpaceRole.spaceUsers) {
+      const user = await this.userRepository.findByUserId(userId);
+      if (!user) {
         throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
       }
-      console.log('userSpaceRole::', userSpaceRole);
 
-      const spaceUser = userSpaceRole.spaceUsers.find(
-        (su) => su.space.id === dto.spaceId,
+      const space = await this.spaceRepository.findSpaceRoleByspaceId(
+        dto.spaceId,
+        userId,
       );
+      if (!space) {
+        throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
+      }
+      if (!space.spaceUsers || space.spaceUsers.length === 0) {
+        throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+      }
+      console.log('space::', space);
+
+      // refactor
+      const type = space.spaceUsers[0].spaceRole.type;
+      console.log('type::', type);
 
       // 2. 공지사항을 작성할 수 있는 어드민 유저인지 권한체크
-      if (
-        dto.type === PostType.NOTICE &&
-        spaceUser.spaceRole.type !== RoleType.ADMIN
-      ) {
+      if (type !== RoleType.ADMIN && dto.type === PostType.NOTICE) {
         throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
       }
 
       // 3. 익명 유저로 작성할 수 있는 참여자인지 체크
-      if (
-        spaceUser.spaceRole.type !== RoleType.PARTICIPANT &&
-        dto.isAnonymous === true
-      ) {
+      if (type !== RoleType.PARTICIPANT && dto.isAnonymous === true) {
         throw new ForbiddenException(HttpErrorConstants.FORBIDDEN_ANONYMOUS);
       }
 
@@ -71,8 +72,8 @@ export class PostsService {
         content: dto.content,
         type: dto.type,
         isAnonymous: dto.isAnonymous,
-        user: userSpaceRole,
-        space: spaceUser.space,
+        user: user,
+        space: space,
       });
 
       //5.저장
@@ -138,7 +139,37 @@ export class PostsService {
     return `This action updates a #${id} post`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  /**
+   * 게시글 삭제 (관리자, 작성자만)
+   * @param id
+   * @returns
+   */
+  async deletPost(postId: number, spaceId: number, userId: number) {
+    // 1. 게시글 조회
+    // 2. 관리자 or 작성자 인지 체크
+    // 3. soft delete
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['author', 'space'],
+    });
+    if (!post && post.space.id !== spaceId) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
+    }
+    console.log('post::', post);
+
+    console.log('post.space.id::', post.space.id);
+    const role = await this.userRepository.findSpaceRoleBySpaceId(
+      userId,
+      post.space.id,
+    );
+    console.log('role::', role);
+    if (
+      role.spaceUsers[0].spaceRole.type !== RoleType.ADMIN &&
+      post.author.id !== userId
+    ) {
+      throw new ForbiddenException(HttpErrorConstants.FORBIDDEN);
+    }
+
+    await this.postRepository.softDelete(postId);
   }
 }

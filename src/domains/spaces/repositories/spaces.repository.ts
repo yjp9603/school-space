@@ -72,4 +72,13 @@ export class SpaceRepository extends Repository<Space> {
       .where('space.id = :spaceId', { spaceId })
       .getOne();
   }
+
+  async findSpaceRoleByspaceId(spaceId: number, userId: number) {
+    return await this.createQueryBuilder('space')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.spaceRole', 'spaceRole')
+      .where('space.id = :spaceId', { spaceId })
+      .andWhere('spaceUser.user_id = :userId', { userId })
+      .getOne();
+  }
 }
