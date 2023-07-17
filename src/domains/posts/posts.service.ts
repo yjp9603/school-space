@@ -115,7 +115,6 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
     }
-    console.log('post::', post);
 
     await this.usersService.validateUser(userId);
     const spaceUser = await this.usersService.getUserSpaceRole(

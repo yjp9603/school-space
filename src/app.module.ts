@@ -30,7 +30,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
         database: configService.get<string>('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
-        logging: true,
+        logging: isDevelopMode,
         namingStrategy: new SnakeNamingStrategy(),
       }),
       inject: [ConfigService],
