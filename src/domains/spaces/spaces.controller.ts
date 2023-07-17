@@ -8,7 +8,6 @@ import {
   Delete,
   Res,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { SpacesService } from './spaces.service';
 import { CreateSpaceDto } from './dtos/create-space.dto';
@@ -18,7 +17,6 @@ import { Response } from 'express';
 import { PageRequest } from 'src/common/page';
 import { JoinSpaceDto } from './dtos/join-space.dto';
 import { UpdateSpaceRoleTypeDto } from './dtos/update-space-role-type.dto';
-import { AuthGuard } from '@nestjs/passport';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 
 @Controller('spaces')

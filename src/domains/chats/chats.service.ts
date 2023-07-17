@@ -8,7 +8,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateChatDto } from './dtos/create-chat.dto';
-import { UpdateChatDto } from './dtos/update-chat.dto';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Chat } from './entities/chat.entity';
 import { RoleType } from '../spaces/constants/constants';
@@ -56,18 +55,6 @@ export class ChatsService {
     await this.chatRepository.save(chat);
 
     return chat.id;
-  }
-
-  findAll() {
-    return `This action returns all chats`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
-
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
   }
 
   /**

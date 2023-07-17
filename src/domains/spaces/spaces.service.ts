@@ -96,7 +96,6 @@ export class SpacesService {
     if (!space) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_SPACE);
     }
-    console.log('space::', space);
 
     // 3. 이미 참여중인 공간인지 확인
     const existingSpaceUser = space.spaceUsers.find(
@@ -105,22 +104,18 @@ export class SpacesService {
     if (existingSpaceUser) {
       throw new ConflictException(HttpErrorConstants.ALREADY_JOINED_SPACE);
     }
-    console.log('existingSpaceUser::', existingSpaceUser);
 
     // 4. 참여 코드에 맞는 권한을 부여 (관리자 or 참여자)
     const roleType =
       joinCode === space.adminCode ? RoleType.ADMIN : RoleType.PARTICIPANT;
-    console.log('roleType::', roleType);
 
     const spaceRole = space.spaceRoles.find((role) => role.type === roleType);
     if (!spaceRole) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_ROLE);
     }
-    console.log('spaceRole::', spaceRole);
 
     // 5. 공간의 구성원으로 추가
     const newSpaceUser = SpaceUser.from(user, spaceRole);
-    console.log('newSpaceUser::', newSpaceUser);
     newSpaceUser.setSpace(space);
     space.addSpaceUser(newSpaceUser);
 

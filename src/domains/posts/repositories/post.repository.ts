@@ -33,4 +33,15 @@ export class PostRepository extends Repository<Post> {
       .andWhere('user.id = :userId', { userId })
       .getOne();
   }
+
+  async findOneWithComments(postId: number): Promise<Post> {
+    return await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.space', 'space')
+      .leftJoinAndSelect('space.spaceUsers', 'spaceUser')
+      .leftJoinAndSelect('spaceUser.user', 'user')
+      .leftJoinAndSelect('spaceUser.spaceRole', 'spaceRole')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('post.id = :postId', { postId })
+      .getOne();
+  }
 }

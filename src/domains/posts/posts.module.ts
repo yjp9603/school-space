@@ -7,6 +7,7 @@ import { SpaceUserRepository } from '../spaces/repositories/spaces-user.reposito
 import { SpaceRepository } from '../spaces/repositories/spaces.repository';
 import { UserRepository } from '../users/repositories/user.repository';
 import { UsersModule } from '../users/users.module';
+import { ChatRepository } from '../chats/repositories/chat.repository';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UsersModule } from '../users/users.module';
       SpaceUserRepository,
       SpaceRepository,
       UserRepository,
+      ChatRepository,
     ]),
     UsersModule,
   ],

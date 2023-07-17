@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Res,
@@ -11,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { UpdatePostDto } from './dtos/update-post.dto';
 import AuthUser from 'src/common/decorators/auth-user.decorator';
 import { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import UseAuthGuards from '../auth/auth-guards/user-auth';
 import { PostPageRequest } from './dtos/post.pagination';
+import { PageRequest } from 'src/common/page';
 
 @Controller('/posts')
 export class PostsController {
@@ -49,11 +48,13 @@ export class PostsController {
   async findPostWithComment(
     @Res() res: Response,
     @Param('postId') postId: number,
+    @Query() pageRequest: PageRequest,
     @AuthUser() user: User,
   ) {
     const result = await this.postsService.findPostWithComment(
       +postId,
       user.id,
+      pageRequest,
     );
     return res.status(200).json(result);
   }

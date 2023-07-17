@@ -4,7 +4,7 @@ import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Post } from 'src/domains/posts/entities/post.entity';
 import { RoleType } from 'src/domains/spaces/constants/constants';
 import { User } from 'src/domains/users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Chat extends BaseEntity {
@@ -67,5 +67,16 @@ export class Chat extends BaseEntity {
 
   isAuthor(userId: number): boolean {
     return this.author.id === userId;
+  }
+
+  requiredAnonymousUserName(userId: number, userRoleType: RoleType) {
+    if (
+      this.isAnonymous &&
+      userId !== this.author.id &&
+      userRoleType !== RoleType.ADMIN
+    ) {
+      return true;
+    }
+    return false;
   }
 }

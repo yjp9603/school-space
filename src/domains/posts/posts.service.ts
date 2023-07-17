@@ -1,5 +1,4 @@
-import { Page } from './../../common/page';
-import { SpaceUserRepository } from './../spaces/repositories/spaces-user.repository';
+import { Page, PageRequest } from './../../common/page';
 import { SpaceRepository } from './../spaces/repositories/spaces.repository';
 import { PostRepository } from './repositories/post.repository';
 import {
@@ -8,17 +7,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { UpdatePostDto } from './dtos/update-post.dto';
 import { UserRepository } from '../users/repositories/user.repository';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
 import { Post } from './entities/post.entity';
-import { PostType } from './constants/constants';
 import { RoleType } from '../spaces/constants/constants';
 import { Connection } from 'typeorm';
 import { PostPageRequest } from './dtos/post.pagination';
 import { PostListDto } from './dtos/post-list.dto';
-import { Name } from '../users/entities/name.entity';
 import { UsersService } from '../users/users.service';
+import { ChatRepository } from '../chats/repositories/chat.repository';
+import { ChatListDto } from '../chats/dtos/chat-list.dto';
 
 @Injectable()
 export class PostsService {
@@ -28,6 +26,7 @@ export class PostsService {
     private readonly spaceRepository: SpaceRepository,
     private readonly connection: Connection,
     private readonly usersService: UsersService,
+    private readonly chatRepository: ChatRepository,
   ) {}
   /**
    * 참여중인 스페이스의 게시글 작성
@@ -101,16 +100,40 @@ export class PostsService {
     return new Page<PostListDto>(totalCount, items, pageRequest);
   }
 
-  async findPostWithComment(userId: number, postId: number) {
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-      relations: ['comments'],
-    });
+  /**
+   * 게시글 상세조회 및 댓글 목록 조회
+   * @param userId
+   * @param postId
+   * @returns
+   */
+  async findPostWithComment(
+    postId: number,
+    userId: number,
+    pageRequest: PageRequest,
+  ) {
+    const post = await this.postRepository.findOneWithComments(postId);
     if (!post) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_POST);
     }
+    console.log('post::', post);
 
-    return post;
+    const user = await this.usersService.validateUser(userId);
+    const spaceUser = await this.usersService.getUserSpaceRole(
+      userId,
+      post.space.id,
+    );
+    const roleType = spaceUser.spaceRole.type;
+
+    const [comments, totalCount] =
+      await this.chatRepository.findAndCountByPostId(postId, pageRequest);
+
+    const items = comments.map((comment) => {
+      return new ChatListDto(comment, userId, roleType);
+    });
+    return {
+      post: new PostListDto(post, userId, roleType),
+      comments: new Page<ChatListDto>(totalCount, items, pageRequest),
+    };
   }
 
   /**
