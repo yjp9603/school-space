@@ -6,9 +6,6 @@ import { Space } from 'src/domains/spaces/entities/space.entity';
 import { PostType } from '../constants/constants';
 import { ForbiddenException } from '@nestjs/common';
 import { HttpErrorConstants } from 'src/common/http/http-error-objects';
-import { PostListDto } from '../dtos/post-list.dto';
-import { Name } from 'src/domains/users/entities/name.entity';
-import { SpaceRole } from 'src/domains/spaces/entities/space-role.entity';
 @Entity()
 export class Post extends BaseEntity {
   @Column({

@@ -63,7 +63,7 @@ export class ChatsService {
    * @param userId
    */
   async deleteChat(chatId: number, userId: number) {
-    const user = await this.usersService.validateUser(userId);
+    await this.usersService.validateUser(userId);
 
     const chat = await this.validateChat(chatId);
 

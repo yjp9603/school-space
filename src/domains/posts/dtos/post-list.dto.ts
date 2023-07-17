@@ -1,4 +1,3 @@
-import { User } from 'src/domains/users/entities/user.entity';
 import { PostType } from '../constants/constants';
 import { Post } from '../entities/post.entity';
 import { RoleType } from 'src/domains/spaces/constants/constants';

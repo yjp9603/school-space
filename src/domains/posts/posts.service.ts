@@ -117,7 +117,7 @@ export class PostsService {
     }
     console.log('post::', post);
 
-    const user = await this.usersService.validateUser(userId);
+    await this.usersService.validateUser(userId);
     const spaceUser = await this.usersService.getUserSpaceRole(
       userId,
       post.space.id,
